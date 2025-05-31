@@ -1,10 +1,13 @@
 {
     "name": "letsdonate/webapp",
     "description": "Lets Donate Web Application",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    },
     "scripts": {
         "post-install-cmd": [
-            "npm install",
-            "npm run build"
+            "php deploy.php"
         ]
     }
 } 

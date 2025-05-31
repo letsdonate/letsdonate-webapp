@@ -1,40 +1,110 @@
 <?php
-$secret = getenv('DEPLOY_SECRET');
-$repo_dir = __DIR__;
-$web_root_dir = $repo_dir;
-$git_bin = 'git';
-$update_remote = 'origin';
-$update_branch = 'hostinger-deployment';
 
-// Check if a secret key is set
-if (!isset($_SERVER['HTTP_X_HUB_SIGNATURE']) && (!isset($_POST['secret']) || $_POST['secret'] !== $secret)) {
-    header('HTTP/1.0 403 Forbidden');
-    die('Access Denied');
+class Deployer {
+    private $nodeVersion = '18';
+    private $distDir;
+    private $publicDir;
+    private $rootDir;
+
+    public function __construct() {
+        $this->rootDir = dirname(__FILE__);
+        $this->distDir = $this->rootDir . '/dist';
+        $this->publicDir = $this->rootDir . '/public';
+    }
+
+    public function deploy() {
+        echo "Starting deployment process...\n";
+        
+        // Ensure we're in the right directory
+        chdir($this->rootDir);
+        
+        // Setup Node.js environment
+        $this->setupNode();
+        
+        // Install dependencies and build
+        $this->installDependencies();
+        $this->buildProject();
+        
+        // Copy built files to public directory
+        $this->copyBuiltFiles();
+        
+        echo "Deployment completed successfully!\n";
+    }
+
+    private function setupNode() {
+        echo "Setting up Node.js environment...\n";
+        
+        // Check if nvm is available
+        $nvmPath = getenv('HOME') . '/.nvm/nvm.sh';
+        if (file_exists($nvmPath)) {
+            echo "Using NVM to install Node.js...\n";
+            $this->executeCommand("source {$nvmPath} && nvm install {$this->nodeVersion} && nvm use {$this->nodeVersion}");
+        } else {
+            // Try using system Node.js
+            $nodeVersion = trim(shell_exec('node -v'));
+            echo "Using system Node.js version: {$nodeVersion}\n";
+        }
+    }
+
+    private function installDependencies() {
+        echo "Installing dependencies...\n";
+        $this->executeCommand('npm install --production');
+    }
+
+    private function buildProject() {
+        echo "Building project...\n";
+        $this->executeCommand('npm run build');
+    }
+
+    private function copyBuiltFiles() {
+        echo "Copying built files...\n";
+        if (!is_dir($this->distDir)) {
+            throw new Exception("Build directory not found!");
+        }
+
+        // Create assets directory if it doesn't exist
+        if (!is_dir($this->publicDir . '/dist')) {
+            mkdir($this->publicDir . '/dist', 0755, true);
+        }
+
+        // Copy all files from dist to public/dist
+        $this->recursiveCopy($this->distDir, $this->publicDir . '/dist');
+    }
+
+    private function recursiveCopy($src, $dst) {
+        $dir = opendir($src);
+        @mkdir($dst);
+        while (($file = readdir($dir))) {
+            if (($file != '.') && ($file != '..')) {
+                if (is_dir($src . '/' . $file)) {
+                    $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
+                } else {
+                    copy($src . '/' . $file, $dst . '/' . $file);
+                }
+            }
+        }
+        closedir($dir);
+    }
+
+    private function executeCommand($command) {
+        $output = [];
+        $returnVar = 0;
+        exec($command . ' 2>&1', $output, $returnVar);
+        
+        foreach ($output as $line) {
+            echo $line . "\n";
+        }
+        
+        if ($returnVar !== 0) {
+            throw new Exception("Command failed: " . $command);
+        }
+    }
 }
 
-// Check if repo directory exists
-if (!is_dir($repo_dir) && !is_readable($repo_dir)) {
-    header('HTTP/1.0 500 Internal Server Error');
-    die("Cannot access repository directory");
-}
-
-// Git commands
-$commands = array(
-    'cd ' . $repo_dir,
-    $git_bin . ' fetch ' . $update_remote,
-    $git_bin . ' reset --hard ' . $update_remote . '/' . $update_branch,
-    $git_bin . ' submodule update --init --recursive',
-    'npm install',
-    'npm run build'
-);
-
-$output = '';
-foreach ($commands as $command) {
-    $tmp = shell_exec($command . ' 2>&1');
-    $output .= "<span style=\"color: #6BE234;\">\$</span> <span style=\"color: #729FCF;\">{$command}\n</span>";
-    $output .= htmlentities(trim($tmp)) . "\n";
-}
-
-echo "<!DOCTYPE HTML><html><head><meta charset=\"UTF-8\"><title>Deployment Log</title></head><body style=\"background-color: #000000; color: #FFFFFF; font-weight: bold; padding: 0 10px;\">";
-echo "<pre>{$output}</pre>";
-echo "</body></html>"; 
+try {
+    $deployer = new Deployer();
+    $deployer->deploy();
+} catch (Exception $e) {
+    echo "Deployment failed: " . $e->getMessage() . "\n";
+    exit(1);
+} 
