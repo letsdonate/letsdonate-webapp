@@ -1,8 +1,38 @@
-Options -MultiViews
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.html [QSA,L]
+DirectoryIndex index.php index.html
 
-<IfModule mod_headers.c>
-  Header set X-Powered-By "Hostinger Horizons"
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # If the request is for an actual file or directory, serve it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # For the root path, serve index.php
+    RewriteRule ^$ index.php [L]
+    
+    # For asset files in the dist directory
+    RewriteCond %{REQUEST_URI} !^/dist/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L]
+    
+    # Allow direct access to assets in the dist directory
+    RewriteCond %{REQUEST_URI} ^/dist/
+    RewriteRule ^dist/(.*)$ dist/$1 [L]
 </IfModule>
+
+# Enable CORS
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Serve correct MIME types
+AddType text/css .css
+AddType text/javascript .js
+AddType application/javascript .mjs
+AddType image/svg+xml .svg
+AddType application/json .json

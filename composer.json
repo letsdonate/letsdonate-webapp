@@ -1,0 +1,10 @@
+{
+    "name": "letsdonate/webapp",
+    "description": "Lets Donate Web Application",
+    "scripts": {
+        "post-install-cmd": [
+            "npm install",
+            "npm run build"
+        ]
+    }
+} 
