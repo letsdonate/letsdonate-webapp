@@ -1,0 +1,8 @@
+{
+  "type": "nodejs",
+  "build": {
+    "command": "npm install && npm run build",
+    "output_path": "dist",
+    "node_version": "18"
+  }
+} 
