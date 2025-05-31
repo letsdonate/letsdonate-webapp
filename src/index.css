@@ -1,47 +1,45 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 30 50% 98%; /* Very light warm off-white */
-    --foreground: 25 45% 20%; /* Dark warm brown for text */
+    --background: 180 25% 97%; /* #F0F4F4 - Soft Teal Off-white */
+    --foreground: 0 0% 20%; /* #333333 - Dark Gray Text */
 
-    --card: 30 50% 95%; /* Slightly darker warm off-white for cards */
-    --card-foreground: 25 45% 25%; /* Dark warm brown for card text */
+    --card: 180 25% 98%; /* Slightly lighter for cards, or same as background */
+    --card-foreground: 0 0% 20%;
 
-    --popover: 30 50% 95%;
-    --popover-foreground: 25 45% 25%;
+    --popover: 180 25% 98%;
+    --popover-foreground: 0 0% 20%;
 
-    --primary: 35 90% 60%; /* Vibrant Warm Orange - Main CTA color */
-    --primary-foreground: 0 0% 100%; /* White text on orange */
+    --primary: 180 100% 25%; /* #008080 - Classic Teal */
+    --primary-foreground: 0 0% 100%; /* White */
+    
+    --primary-soft: 175 70% 40%; /* #20B2AA - Softer Teal for hover/accents */
+    --primary-soft-foreground: 0 0% 100%;
 
-    --secondary: 195 70% 50%; /* Uplifting Sky Blue - Secondary actions, info highlights */
-    --secondary-foreground: 0 0% 100%; /* White text on blue */
+    --secondary: 15 100% 87%; /* #FFD9C0 - Soft Peach */
+    --secondary-foreground: 0 0% 20%; /* Dark Gray for text on peach */
 
-    --muted: 30 30% 88%; /* Muted warm gray */
-    --muted-foreground: 30 20% 50%; /* Darker muted gray for text on muted */
+    --muted: 180 10% 90%; /* #E0E7E7 - Muted Teal Gray */
+    --muted-foreground: 180 5% 45%; /* #6A7373 - Darker Muted Teal Gray */
 
-    --accent: 45 90% 60%; /* Bright Yellow - for highlights, icons, attention grabbers */
-    --accent-foreground: 30 50% 20%; /* Dark brown text on yellow */
+    --accent: 0 100% 71%; /* #FF6B6B - Coral for subtle accents */
+    --accent-foreground: 0 0% 100%; /* White */
 
     --destructive: 0 70% 55%; /* Warm Red for errors */
-    --destructive-foreground: 0 0% 100%; /* White text on red */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 30 30% 80%; /* Light warm gray border */
-    --input: 30 30% 85%; /* Slightly darker input border */
-    --ring: 35 90% 60%; /* Orange for focus rings */
+    --border: 180 15% 85%; /* #CED9D9 - Light Teal Gray Border */
+    --input: 180 15% 90%; /* #DAE2E2 - Slightly lighter input border */
+    --ring: 180 100% 30%; /* #009999 - Teal for focus rings */
 
-    --radius: 0.75rem;
+    --radius: 0.75rem; /* Rounded edges */
   }
 
   .dark {
-    /* Define dark mode colors if needed later */
-    /* Example:
-    --background: 20 14.3% 4.1%;
-    --foreground: 60 9.1% 97.8%;
-    */
+    /* Dark mode can be defined later if needed */
   }
 }
 
@@ -51,27 +49,36 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', sans-serif; /* Clean font */
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-    font-family: 'Roboto', sans-serif;
+    @apply font-heading tracking-tight; /* Montserrat for headings */
+    font-family: 'Montserrat', sans-serif;
   }
-  h1 { @apply text-4xl lg:text-5xl; }
-  h2 { @apply text-3xl lg:text-4xl; }
-  h3 { @apply text-2xl lg:text-3xl; }
-  h4 { @apply text-xl lg:text-2xl; }
-  p { @apply leading-relaxed; }
+  h1 { @apply text-4xl lg:text-5xl font-bold; }
+  h2 { @apply text-3xl lg:text-4xl font-semibold; }
+  h3 { @apply text-2xl lg:text-3xl font-semibold; }
+  h4 { @apply text-xl lg:text-2xl font-semibold; }
+  p { @apply leading-relaxed text-base lg:text-lg; } /* Elegant spacing */
 }
 
 .glassmorphism {
-  background: rgba(255, 255, 255, 0.2);
+  background: hsla(var(--card) / 0.6); /* Use HSL for consistency */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid hsla(var(--border) / 0.3);
+  @apply shadow-soft;
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--primary-soft))] bg-clip-text text-transparent;
 }
-  
+
+.teal-overlay-gradient {
+  background: linear-gradient(rgba(0,128,128,0.6), rgba(0,128,128,0.75));
+}
+
+/* Smooth scroll for parallax (if implemented with JS) */
+html {
+  scroll-behavior: smooth;
+}
