@@ -1,0 +1,77 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 50% 98%; /* Very light warm off-white */
+    --foreground: 25 45% 20%; /* Dark warm brown for text */
+
+    --card: 30 50% 95%; /* Slightly darker warm off-white for cards */
+    --card-foreground: 25 45% 25%; /* Dark warm brown for card text */
+
+    --popover: 30 50% 95%;
+    --popover-foreground: 25 45% 25%;
+
+    --primary: 35 90% 60%; /* Vibrant Warm Orange - Main CTA color */
+    --primary-foreground: 0 0% 100%; /* White text on orange */
+
+    --secondary: 195 70% 50%; /* Uplifting Sky Blue - Secondary actions, info highlights */
+    --secondary-foreground: 0 0% 100%; /* White text on blue */
+
+    --muted: 30 30% 88%; /* Muted warm gray */
+    --muted-foreground: 30 20% 50%; /* Darker muted gray for text on muted */
+
+    --accent: 45 90% 60%; /* Bright Yellow - for highlights, icons, attention grabbers */
+    --accent-foreground: 30 50% 20%; /* Dark brown text on yellow */
+
+    --destructive: 0 70% 55%; /* Warm Red for errors */
+    --destructive-foreground: 0 0% 100%; /* White text on red */
+
+    --border: 30 30% 80%; /* Light warm gray border */
+    --input: 30 30% 85%; /* Slightly darker input border */
+    --ring: 35 90% 60%; /* Orange for focus rings */
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Define dark mode colors if needed later */
+    /* Example:
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+    font-family: 'Roboto', sans-serif;
+  }
+  h1 { @apply text-4xl lg:text-5xl; }
+  h2 { @apply text-3xl lg:text-4xl; }
+  h3 { @apply text-2xl lg:text-3xl; }
+  h4 { @apply text-xl lg:text-2xl; }
+  p { @apply leading-relaxed; }
+}
+
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+}
+  
