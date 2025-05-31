@@ -1,110 +1,86 @@
 <?php
 
 class Deployer {
-    private $nodeVersion = '18';
-    private $distDir;
-    private $publicDir;
     private $rootDir;
+    private $publicDir;
 
     public function __construct() {
         $this->rootDir = dirname(__FILE__);
-        $this->distDir = $this->rootDir . '/dist';
         $this->publicDir = $this->rootDir . '/public';
     }
 
     public function deploy() {
-        echo "Starting deployment process...\n";
-        
-        // Ensure we're in the right directory
-        chdir($this->rootDir);
-        
-        // Setup Node.js environment
-        $this->setupNode();
-        
-        // Install dependencies and build
-        $this->installDependencies();
-        $this->buildProject();
-        
-        // Copy built files to public directory
-        $this->copyBuiltFiles();
-        
-        echo "Deployment completed successfully!\n";
-    }
-
-    private function setupNode() {
-        echo "Setting up Node.js environment...\n";
-        
-        // Check if nvm is available
-        $nvmPath = getenv('HOME') . '/.nvm/nvm.sh';
-        if (file_exists($nvmPath)) {
-            echo "Using NVM to install Node.js...\n";
-            $this->executeCommand("source {$nvmPath} && nvm install {$this->nodeVersion} && nvm use {$this->nodeVersion}");
-        } else {
-            // Try using system Node.js
-            $nodeVersion = trim(shell_exec('node -v'));
-            echo "Using system Node.js version: {$nodeVersion}\n";
+        try {
+            echo "Starting deployment process...\n";
+            
+            // Create necessary directories
+            $this->ensureDirectoryExists($this->publicDir . '/dist');
+            
+            // Copy the pre-built files from the repository
+            $this->copyStaticFiles();
+            
+            echo "Deployment completed successfully!\n";
+            return true;
+        } catch (Exception $e) {
+            echo "Error during deployment: " . $e->getMessage() . "\n";
+            return false;
         }
     }
 
-    private function installDependencies() {
-        echo "Installing dependencies...\n";
-        $this->executeCommand('npm install --production');
+    private function ensureDirectoryExists($dir) {
+        if (!is_dir($dir)) {
+            if (!mkdir($dir, 0755, true)) {
+                throw new Exception("Failed to create directory: $dir");
+            }
+        }
     }
 
-    private function buildProject() {
-        echo "Building project...\n";
-        $this->executeCommand('npm run build');
-    }
-
-    private function copyBuiltFiles() {
-        echo "Copying built files...\n";
-        if (!is_dir($this->distDir)) {
-            throw new Exception("Build directory not found!");
+    private function copyStaticFiles() {
+        // Copy index.html to public directory
+        if (file_exists($this->rootDir . '/index.html')) {
+            if (!copy($this->rootDir . '/index.html', $this->publicDir . '/index.html')) {
+                throw new Exception("Failed to copy index.html");
+            }
         }
 
-        // Create assets directory if it doesn't exist
-        if (!is_dir($this->publicDir . '/dist')) {
-            mkdir($this->publicDir . '/dist', 0755, true);
+        // Copy static assets if they exist
+        if (is_dir($this->rootDir . '/dist')) {
+            $this->recursiveCopy($this->rootDir . '/dist', $this->publicDir . '/dist');
         }
-
-        // Copy all files from dist to public/dist
-        $this->recursiveCopy($this->distDir, $this->publicDir . '/dist');
     }
 
     private function recursiveCopy($src, $dst) {
+        if (!is_dir($src)) {
+            throw new Exception("Source directory does not exist: $src");
+        }
+
+        $this->ensureDirectoryExists($dst);
         $dir = opendir($src);
-        @mkdir($dst);
+        
         while (($file = readdir($dir))) {
-            if (($file != '.') && ($file != '..')) {
-                if (is_dir($src . '/' . $file)) {
-                    $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
+            if ($file != '.' && $file != '..') {
+                $srcPath = $src . '/' . $file;
+                $dstPath = $dst . '/' . $file;
+                
+                if (is_dir($srcPath)) {
+                    $this->recursiveCopy($srcPath, $dstPath);
                 } else {
-                    copy($src . '/' . $file, $dst . '/' . $file);
+                    if (!copy($srcPath, $dstPath)) {
+                        throw new Exception("Failed to copy file: $srcPath");
+                    }
                 }
             }
         }
         closedir($dir);
     }
-
-    private function executeCommand($command) {
-        $output = [];
-        $returnVar = 0;
-        exec($command . ' 2>&1', $output, $returnVar);
-        
-        foreach ($output as $line) {
-            echo $line . "\n";
-        }
-        
-        if ($returnVar !== 0) {
-            throw new Exception("Command failed: " . $command);
-        }
-    }
 }
 
 try {
     $deployer = new Deployer();
-    $deployer->deploy();
+    if (!$deployer->deploy()) {
+        exit(1);
+    }
 } catch (Exception $e) {
-    echo "Deployment failed: " . $e->getMessage() . "\n";
+    echo "Fatal error during deployment: " . $e->getMessage() . "\n";
     exit(1);
 } 
