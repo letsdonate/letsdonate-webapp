@@ -1,32 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { supabase } from '@/lib/supabaseClient';
 
 const Footer = () => {
   const { toast } = useToast();
-  const [newsletterEmail, setNewsletterEmail] = useLocalStorage('newsletterEmail', '');
-  const [newsletterSubmissions, setNewsletterSubmissions] = useLocalStorage('newsletterSubmissions', []);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
 
-
-  const handleNewsletterSubmit = (e) => {
+  const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (newsletterEmail && /\S+@\S+\.\S+/.test(newsletterEmail)) {
-      const newSubscription = { email: newsletterEmail, submissionDate: new Date().toISOString() };
-      setNewsletterSubmissions(prev => [...prev, newSubscription]);
-      
-      toast({
-        title: "Subscribed! 🎉",
-        description: "Thanks for joining our newsletter. We'll keep you updated!",
-        className: "bg-primary text-primary-foreground",
-      });
-      // Simulate sending email to admin (console log for now)
-      console.log("New Newsletter Subscription (Simulated Email to Admin):", newSubscription);
-      setNewsletterEmail(''); 
+      const { data, error } = await supabase
+        .from('newsletter_subscriptions')
+        .insert([{ email: newsletterEmail }]);
+
+      if (error) {
+        if (error.code === '23505') { // Unique violation
+            toast({
+            title: "Already Subscribed!",
+            description: "This email address is already on our newsletter list.",
+            variant: "default",
+            className: "bg-secondary text-secondary-foreground"
+            });
+        } else {
+            toast({
+            title: "Subscription Error",
+            description: error.message,
+            variant: "destructive",
+            });
+        }
+      } else {
+        toast({
+          title: "Subscribed! 🎉",
+          description: "Thanks for joining our newsletter. We'll keep you updated!",
+          className: "bg-primary text-primary-foreground",
+        });
+        setNewsletterEmail(''); 
+      }
     } else {
       toast({
         title: "Uh oh!",

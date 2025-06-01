@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Gift, BookOpen, Shirt, ToyBrick, MapPin, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { supabase } from '@/lib/supabaseClient';
 
 const neededMaterialsEvents = [
   { 
@@ -55,7 +55,6 @@ const dropOffLocations = [
 
 const MaterialDonationPage = () => {
   const { toast } = useToast();
-  const [materialDonations, setMaterialDonations] = useLocalStorage('materialDonationSubmissions', []);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -70,7 +69,7 @@ const MaterialDonationPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.items) {
       toast({ title: "Incomplete Form", description: "Please fill in your name, email, and items to donate.", variant: "destructive" });
@@ -81,19 +80,30 @@ const MaterialDonationPage = () => {
       return;
     }
     
-    const newDonation = { ...formData, submissionDate: new Date().toISOString() };
-    setMaterialDonations(prev => [...prev, newDonation]);
+    const { data, error } = await supabase
+      .from('material_donations')
+      .insert([
+        { 
+          name: formData.name, 
+          email: formData.email, 
+          phone: formData.phone,
+          items: formData.items,
+          preferred_location: formData.preferredLocation,
+          message: formData.message
+        }
+      ]);
 
-    toast({
-      title: "Contribution Noted! 🌟",
-      description: `Thank you, ${formData.name}! We've received your material donation details. We'll contact you shortly regarding drop-off/pickup.`,
-      className: "bg-primary text-primary-foreground",
-      duration: 7000,
-    });
-    // Simulate sending email to admin (console log for now)
-    console.log("New Material Donation Submission (Simulated Email to Admin):", newDonation);
-
-    setFormData({ name: '', email: '', phone: '', items: '', preferredLocation: '', message: '' }); // Reset form
+    if (error) {
+      toast({ title: "Submission Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({
+        title: "Contribution Noted! 🌟",
+        description: `Thank you, ${formData.name}! We've received your material donation details. We'll contact you shortly regarding drop-off/pickup.`,
+        className: "bg-primary text-primary-foreground",
+        duration: 7000,
+      });
+      setFormData({ name: '', email: '', phone: '', items: '', preferredLocation: '', message: '' }); 
+    }
   };
 
   const cardVariants = {
