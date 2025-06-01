@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'; // Added CardFooter
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
-import { Clock, DollarSign, Gift, Users, BookOpen, Home, Eye, Send, BookHeart } from 'lucide-react'; // Added Send, BookHeart
+import { Clock, DollarSign, Gift, Users, BookOpen, Home, Eye, Send, BookHeart, CheckSquare, CalendarDays, Users2, HelpCircle, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Input } from '@/components/ui/input'; // Added Input
-import { Label } from '@/components/ui/label'; // Added Label
-import { Textarea } from '@/components/ui/textarea'; // Added Textarea
-import { useToast } from '@/components/ui/use-toast'; // Added useToast
-import { supabase } from '@/lib/supabaseClient'; // Added supabase
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/supabaseClient';
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 const donationOptions = [
   { title: 'Donate Time', description: 'Volunteer your skills and become part of our mission.', icon: <Clock className="h-10 w-10 text-primary mb-4" />, link: '/donate/time', cta: 'Volunteer Now' },
@@ -19,9 +21,10 @@ const donationOptions = [
 ];
 
 const achievements = [
-  { end: 150, suffix: '+', label: 'Volunteers Onboarded', icon: <Users className="h-10 w-10 text-secondary mx-auto mb-3" /> },
-  { end: 5000, suffix: '+', label: 'Children Impacted', icon: <BookOpen className="h-10 w-10 text-secondary mx-auto mb-3" /> },
-  { end: 25, suffix: '+', label: 'Institutions Served', icon: <Home className="h-10 w-10 text-secondary mx-auto mb-3" /> },
+  { end: 14, suffix: '+', label: 'Institutes Served', icon: <Home className="h-10 w-10 text-secondary mx-auto mb-3" /> },
+  { end: 5000, suffix: '+', label: 'Sessions Conducted', icon: <BookHeart className="h-10 w-10 text-secondary mx-auto mb-3" /> },
+  { end: 2000, suffix: '+', label: 'People Impacted', icon: <Users className="h-10 w-10 text-secondary mx-auto mb-3" /> },
+  { end: 300, suffix: '+', label: 'Volunteers Onboarded', icon: <UserPlus className="h-10 w-10 text-secondary mx-auto mb-3" /> },
 ];
 
 const galleryImages = [
@@ -30,30 +33,70 @@ const galleryImages = [
   { srcPlaceholder: "A group of happy volunteers posing together", alt: "Happy volunteers group photo" },
 ];
 
-// Volunteer Form Component (can be extracted to its own file later)
-const VolunteerFormSection = () => {
+const areasOfInterestOptions = [
+  { id: 'teaching', label: 'Teaching & Tutoring' },
+  { id: 'admin', label: 'Administrative Support' },
+  { id: 'photography', label: 'Photography & Videography' },
+  { id: 'events', label: 'Event Management & Support' },
+  { id: 'fundraising', label: 'Fundraising & Outreach' },
+  { id: 'mentorship', label: 'Mentorship Programs' },
+  { id: 'skills', label: 'Skill-based Workshops (Art, Music, etc.)' },
+  { id: 'other', label: 'Other (Please specify)' },
+];
+
+const VolunteerFormSection = ({ formIdPrefix = "home" }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phoneNumber: '',
-    areaOfInterest: '',
+    city: '',
+    age: '',
+    areasOfInterest: [],
+    availability: '',
+    whyVolunteer: '',
+    howHeard: '',
+    otherAreaOfInterest: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleCheckboxChange = (areaId) => {
+    setFormData(prev => {
+      const newAreas = prev.areasOfInterest.includes(areaId)
+        ? prev.areasOfInterest.filter(area => area !== areaId)
+        : [...prev.areasOfInterest, areaId];
+      return { ...prev, areasOfInterest: newAreas };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.email || !formData.phoneNumber) {
-      toast({ title: "Incomplete Form", description: "Please fill in Full Name, Email, and Phone Number.", variant: "destructive" });
+    setIsSubmitting(true);
+    if (!formData.fullName || !formData.email || !formData.phoneNumber || !formData.age) {
+      toast({ title: "Incomplete Form", description: "Please fill in Full Name, Email, Phone Number, and Age.", variant: "destructive" });
+      setIsSubmitting(false);
       return;
     }
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
       toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
+      setIsSubmitting(false);
       return;
+    }
+    if (isNaN(parseInt(formData.age)) || parseInt(formData.age) <= 0) {
+        toast({ title: "Invalid Age", description: "Please enter a valid age.", variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+    }
+
+    let finalAreasOfInterest = formData.areasOfInterest.join(', ');
+    if (formData.areasOfInterest.includes('other') && formData.otherAreaOfInterest) {
+      finalAreasOfInterest += `, Other: ${formData.otherAreaOfInterest}`;
     }
     
     const { data, error } = await supabase
@@ -62,10 +105,15 @@ const VolunteerFormSection = () => {
         full_name: formData.fullName, 
         email: formData.email, 
         phone_number: formData.phoneNumber,
-        area_of_interest: formData.areaOfInterest,
-        // 'reason_to_volunteer' and 'city' are not in this simplified form
+        city: formData.city,
+        age: parseInt(formData.age),
+        areas_of_interest: finalAreasOfInterest,
+        availability: formData.availability,
+        reason_to_volunteer: formData.whyVolunteer, // Ensure this matches DB column name
+        how_they_heard: formData.howHeard,
       }]);
 
+    setIsSubmitting(false);
     if (error) {
       toast({ title: "Application Error", description: error.message, variant: "destructive" });
     } else {
@@ -75,38 +123,80 @@ const VolunteerFormSection = () => {
         className: "bg-primary text-primary-foreground",
         duration: 7000
       });
-      setFormData({ fullName: '', email: '', phoneNumber: '', areaOfInterest: '' });
+      setFormData({ fullName: '', email: '', phoneNumber: '', city: '', age: '', areasOfInterest: [], availability: '', whyVolunteer: '', howHeard: '', otherAreaOfInterest: '' });
     }
   };
 
   return (
-    <SectionWrapper id="home-volunteer-form" className="bg-secondary/10 rounded-xl py-16 md:py-20">
+    <SectionWrapper id={`${formIdPrefix}-volunteer-form`} className="bg-secondary/10 rounded-xl py-16 md:py-20">
       <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-4">Become a Volunteer Today</h2>
       <p className="text-center text-muted-foreground mb-12 md:mb-16 max-w-xl mx-auto">
         Join our passionate team and make a direct impact. Fill out the form below to get started!
       </p>
-      <Card className="max-w-2xl mx-auto p-6 sm:p-8 rounded-xl shadow-soft bg-background">
+      <Card className="max-w-3xl mx-auto p-6 sm:p-8 rounded-xl shadow-soft bg-background">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label htmlFor="home-fullName" className="font-medium">Full Name <span className="text-destructive">*</span></Label>
-            <Input id="home-fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="E.g., Priya Sharma" required className="mt-1 rounded-lg"/>
+          <div className="grid sm:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor={`${formIdPrefix}-fullName`} className="font-medium">Full Name <span className="text-destructive">*</span></Label>
+              <Input id={`${formIdPrefix}-fullName`} name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="E.g., Priya Sharma" required className="mt-1 rounded-lg"/>
+            </div>
+            <div>
+              <Label htmlFor={`${formIdPrefix}-email`} className="font-medium">Email Address <span className="text-destructive">*</span></Label>
+              <Input id={`${formIdPrefix}-email`} name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="E.g., priya@example.com" required className="mt-1 rounded-lg"/>
+            </div>
           </div>
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="home-email" className="font-medium">Email Address <span className="text-destructive">*</span></Label>
-              <Input id="home-email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="E.g., priya@example.com" required className="mt-1 rounded-lg"/>
+              <Label htmlFor={`${formIdPrefix}-phoneNumber`} className="font-medium">Phone Number <span className="text-destructive">*</span></Label>
+              <Input id={`${formIdPrefix}-phoneNumber`} name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="E.g., 9876543210" required className="mt-1 rounded-lg"/>
             </div>
             <div>
-              <Label htmlFor="home-phoneNumber" className="font-medium">Phone Number <span className="text-destructive">*</span></Label>
-              <Input id="home-phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="E.g., 9876543210" required className="mt-1 rounded-lg"/>
+              <Label htmlFor={`${formIdPrefix}-city`} className="font-medium">City</Label>
+              <Input id={`${formIdPrefix}-city`} name="city" value={formData.city} onChange={handleInputChange} placeholder="E.g., Bangalore" className="mt-1 rounded-lg"/>
             </div>
           </div>
           <div>
-            <Label htmlFor="home-areaOfInterest" className="font-medium">Area of Interest (Optional)</Label>
-            <Input id="home-areaOfInterest" name="areaOfInterest" value={formData.areaOfInterest} onChange={handleInputChange} placeholder="E.g., Teaching, Event Support, Creative Arts" className="mt-1 rounded-lg"/>
+            <Label htmlFor={`${formIdPrefix}-age`} className="font-medium">Age <span className="text-destructive">*</span></Label>
+            <Input id={`${formIdPrefix}-age`} name="age" type="number" value={formData.age} onChange={handleInputChange} placeholder="E.g., 25" required className="mt-1 rounded-lg"/>
           </div>
-          <Button type="submit" size="lg" className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground py-3 text-base">
-            <Send className="h-5 w-5 mr-2" /> Submit Application
+          <div>
+            <Label className="font-medium block mb-2">Area(s) of Interest</Label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+              {areasOfInterestOptions.map(option => (
+                <div key={option.id} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`${formIdPrefix}-area-${option.id}`} 
+                    checked={formData.areasOfInterest.includes(option.id)}
+                    onCheckedChange={() => handleCheckboxChange(option.id)}
+                  />
+                  <Label htmlFor={`${formIdPrefix}-area-${option.id}`} className="text-sm font-normal text-muted-foreground cursor-pointer">{option.label}</Label>
+                </div>
+              ))}
+            </div>
+            {formData.areasOfInterest.includes('other') && (
+              <Input 
+                name="otherAreaOfInterest" 
+                value={formData.otherAreaOfInterest} 
+                onChange={handleInputChange} 
+                placeholder="Please specify other area" 
+                className="mt-2 rounded-lg"
+              />
+            )}
+          </div>
+          <div>
+            <Label htmlFor={`${formIdPrefix}-availability`} className="font-medium">Availability</Label>
+            <Input id={`${formIdPrefix}-availability`} name="availability" value={formData.availability} onChange={handleInputChange} placeholder="E.g., Weekends, Weekday evenings" className="mt-1 rounded-lg"/>
+          </div>
+          <div>
+            <Label htmlFor={`${formIdPrefix}-whyVolunteer`} className="font-medium">Why do you want to volunteer?</Label>
+            <Textarea id={`${formIdPrefix}-whyVolunteer`} name="whyVolunteer" value={formData.whyVolunteer} onChange={handleInputChange} placeholder="Share your motivation (short text)" className="mt-1 rounded-lg" rows={3}/>
+          </div>
+          <div>
+            <Label htmlFor={`${formIdPrefix}-howHeard`} className="font-medium">Where did you hear about us?</Label>
+            <Input id={`${formIdPrefix}-howHeard`} name="howHeard" value={formData.howHeard} onChange={handleInputChange} placeholder="E.g., Social Media, Friend, Event" className="mt-1 rounded-lg"/>
+          </div>
+          <Button type="submit" size="lg" className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground py-3 text-base" disabled={isSubmitting}>
+            <Send className="h-5 w-5 mr-2" /> {isSubmitting ? 'Submitting...' : 'Submit Application'}
           </Button>
         </form>
       </Card>
@@ -132,7 +222,6 @@ const LandingPage = () => {
 
   return (
     <div className="space-y-16 md:space-y-24">
-      {/* Hero Section */}
       <SectionWrapper fullWidth className="!py-0 relative min-h-[70vh] md:min-h-[85vh] flex items-center justify-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
@@ -159,7 +248,6 @@ const LandingPage = () => {
         </motion.div>
       </SectionWrapper>
 
-      {/* About Let's Donate Intro */}
       <SectionWrapper id="about-intro">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let’s Donate</h2>
@@ -172,10 +260,9 @@ const LandingPage = () => {
         </div>
       </SectionWrapper>
 
-      {/* Achievements Section */}
       <SectionWrapper id="achievements" className="bg-primary/5 rounded-xl py-16 md:py-20">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Our Impact So Far</h2>
-        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {achievements.map((ach, index) => (
             <motion.div 
               key={index} 
@@ -194,7 +281,6 @@ const LandingPage = () => {
         </div>
       </SectionWrapper>
       
-      {/* How Can You Help Section */}
       <SectionWrapper id="how-to-help">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">How Can You Help?</h2>
         <div className="grid md:grid-cols-3 gap-8">
@@ -216,7 +302,7 @@ const LandingPage = () => {
                 <CardContent className="flex-grow">
                   <CardDescription className="text-base text-muted-foreground">{option.description}</CardDescription>
                 </CardContent>
-                <CardFooter className="p-6 pb-8"> {/* Adjusted padding */}
+                <CardFooter className="p-6 pb-8">
                   <Button asChild className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground">
                     <Link to={option.link}>{option.cta}</Link>
                   </Button>
@@ -227,12 +313,11 @@ const LandingPage = () => {
         </div>
       </SectionWrapper>
 
-      {/* Volunteer Form Section added to Landing Page */}
-      <VolunteerFormSection />
-
-      {/* Gallery Preview Section */}
       <SectionWrapper id="gallery-preview" className="bg-secondary/10 rounded-xl py-16 md:py-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Moments of Joy</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-4">Moments of Joy</h2>
+        <p className="text-center text-muted-foreground mb-12 md:mb-16 max-w-xl mx-auto">
+          Explore more photos and details about our work — check out our initiatives.
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
           {galleryImages.map((image, index) => (
             <motion.div
@@ -254,29 +339,18 @@ const LandingPage = () => {
         </div>
         <div className="text-center">
           <Button asChild size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10 hover:text-primary rounded-lg px-8 py-3 text-base">
-            <Link to="/events-gallery" className="flex items-center">
-              <Eye className="h-5 w-5 mr-2" /> View Full Gallery
+            <Link to="/initiatives-events" className="flex items-center">
+              <Eye className="h-5 w-5 mr-2" /> View Initiatives & Events
             </Link>
           </Button>
         </div>
       </SectionWrapper>
 
-      <SectionWrapper id="call-to-action" className="text-center py-16 md:py-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Ready to Make a Difference?</h2>
-        <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-          Your contribution, no matter how small, creates ripples of positive change. Join us today.
-        </p>
-        <div className="space-y-4 sm:space-y-0 sm:space-x-6">
-          <Button size="lg" asChild className="bg-primary hover:bg-primary-soft text-primary-foreground rounded-xl px-10 py-3 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105">
-            <Link to="/donate/money">Donate Now</Link>
-          </Button>
-          <Button size="lg" variant="outline" asChild className="border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-xl px-10 py-3 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105">
-            <Link to="/donate/time">Become a Volunteer</Link>
-          </Button>
-        </div>
-      </SectionWrapper>
+      <VolunteerFormSection formIdPrefix="home" />
+      
     </div>
   );
 };
 
 export default LandingPage;
+export { VolunteerFormSection }; // Export for use in TimeDonationPage

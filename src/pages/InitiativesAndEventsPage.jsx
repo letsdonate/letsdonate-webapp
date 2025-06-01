@@ -5,52 +5,53 @@ import SectionWrapper from '@/components/shared/SectionWrapper';
 import EventCard from '@/components/shared/EventCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Image, CalendarHeart, SlidersHorizontal, Loader2, Sparkles, ListFilter, AlertTriangle } from 'lucide-react';
+import { Image, CalendarHeart, SlidersHorizontal, Loader2, Sparkles, ListFilter, AlertTriangle, Briefcase, Clock, CheckCircle, HeartHandshake as Handshake, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { staticInitiativesData } from '@/data/initiativesData';
+import { otherNgoInitiatives } from '@/data/otherNgoData'; // Import other NGO data
 
 const placeholderEventTemplate = {
   id: null, 
-  title: 'Upcoming Event - Stay Tuned!',
-  description: 'Details about this exciting event will be shared soon. We are working hard to bring you more opportunities to connect and contribute.',
+  title: 'Exciting Event - Stay Tuned!',
+  description: 'Details about this event will be shared soon. We are working hard to bring you more opportunities to connect and contribute.',
   date: 'To Be Announced',
   location: 'To Be Confirmed',
-  photos: ['/images/events/placeholder/event_placeholder_1.jpg'], // Generic placeholder image
-  youtube_link: null, // Default to null
+  photos: ['/images/events/placeholder/event_placeholder_1.jpg'],
+  youtube_link: null,
   category: 'General',
-  type: 'event'
+  type: 'event',
+  status: 'future' // future, ongoing, past
 };
 
-const generatePlaceholders = (count, existingIds) => {
+const generatePlaceholders = (count, existingIds, status = 'future') => {
   const placeholders = [];
   for (let i = 0; i < count; i++) {
-    let placeholderId = `placeholder-event-${i}`;
+    let placeholderId = `placeholder-${status}-event-${i}`;
     let k = 0;
     while (existingIds.has(placeholderId)) {
       k++;
-      placeholderId = `placeholder-event-${i}-${k}`;
+      placeholderId = `placeholder-${status}-event-${i}-${k}`;
     }
     placeholders.push({
       ...placeholderEventTemplate,
       id: placeholderId,
-      title: `Exciting Event Placeholder ${i + 1}`,
-      photos: [`/images/events/placeholder/event_placeholder_${(i%3)+1}.jpg`], // Cycle through a few placeholders
+      title: `${status.charAt(0).toUpperCase() + status.slice(1)} Event Placeholder ${i + 1}`,
+      photos: [`/images/events/placeholder/event_placeholder_${(i%3)+1}.jpg`],
       youtube_link: i % 2 === 0 ? "https://www.youtube.com/embed/VIDEO_ID_PLACEHOLDER" : null,
+      status: status,
     });
     existingIds.add(placeholderId);
   }
   return placeholders;
 };
 
-
-const MINIMUM_EVENTS_DISPLAY = 6;
+const MINIMUM_EVENTS_PER_SECTION = 2; 
 
 const InitiativesAndEventsPage = () => {
   const [dbEvents, setDbEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [selectedFilter, setSelectedFilter] = useState('All');
   const { toast } = useToast();
 
   const fetchDbEvents = useCallback(async () => {
@@ -64,7 +65,17 @@ const InitiativesAndEventsPage = () => {
       toast({ title: 'Error Fetching Events', description: error.message, variant: 'destructive' });
       setDbEvents([]);
     } else {
-      setDbEvents(data.map(event => ({ ...event, type: 'event' })));
+      const now = new Date();
+      const categorizedEvents = data.map(event => {
+        const eventDate = new Date(event.date);
+        let status = 'past';
+        if (!event.date) status = 'future'; 
+        else if (eventDate > now) status = 'future';
+        else if (eventDate.toDateString() === now.toDateString()) status = 'ongoing';
+        
+        return { ...event, type: 'event', status };
+      });
+      setDbEvents(categorizedEvents);
     }
     setLoadingEvents(false);
   }, [toast]);
@@ -75,26 +86,24 @@ const InitiativesAndEventsPage = () => {
 
   const initiativesToDisplay = staticInitiativesData.map(init => ({ ...init, type: 'initiative' }));
   
-  let eventsToDisplay = [...dbEvents];
+  const ongoingEvents = dbEvents.filter(e => e.status === 'ongoing');
+  const futureEvents = dbEvents.filter(e => e.status === 'future');
+  const pastEvents = dbEvents.filter(e => e.status === 'past');
+
   const existingEventIds = new Set(dbEvents.map(e => e.id));
-  
-  if (eventsToDisplay.length < MINIMUM_EVENTS_DISPLAY) {
-    const placeholdersNeeded = MINIMUM_EVENTS_DISPLAY - eventsToDisplay.length;
-    eventsToDisplay.push(...generatePlaceholders(placeholdersNeeded, existingEventIds));
-  }
-  
-  const allItems = [...initiativesToDisplay, ...eventsToDisplay];
-  
-  const filters = ['All', 'Initiatives', 'Events', ...new Set(allItems.filter(item => item.type === 'event' && item.category).map(event => event.category))];
 
-  const filteredItems = selectedFilter === 'All' 
-    ? allItems
-    : allItems.filter(item => {
-        if (selectedFilter === 'Initiatives') return item.type === 'initiative';
-        if (selectedFilter === 'Events') return item.type === 'event';
-        return item.category === selectedFilter && item.type === 'event';
-      });
+  const fillPlaceholders = (eventArray, status) => {
+    if (eventArray.length < MINIMUM_EVENTS_PER_SECTION) {
+      const placeholdersNeeded = MINIMUM_EVENTS_PER_SECTION - eventArray.length;
+      return [...eventArray, ...generatePlaceholders(placeholdersNeeded, existingEventIds, status)];
+    }
+    return eventArray;
+  };
 
+  const displayOngoingEvents = fillPlaceholders(ongoingEvents, 'ongoing');
+  const displayFutureEvents = fillPlaceholders(futureEvents, 'future');
+  const displayPastEvents = fillPlaceholders(pastEvents, 'past');
+  
   const cardVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: (i) => ({
@@ -105,7 +114,7 @@ const InitiativesAndEventsPage = () => {
     }),
   };
 
-  const InitiativeCard = ({ initiative, index }) => (
+  const InitiativeCard = ({ initiative, index, isOtherNgo = false }) => (
      <motion.custom
       key={initiative.id}
       custom={index}
@@ -117,27 +126,69 @@ const InitiativesAndEventsPage = () => {
       <Card className={`rounded-xl shadow-soft hover:shadow-soft-hover transition-shadow duration-300 overflow-hidden flex flex-col h-full ${initiative.themeColor || 'bg-card'}`}>
         <CardHeader className="p-5 md:p-6 items-center text-center">
           {initiative.icon ? React.cloneElement(initiative.icon, {className: "h-10 w-10 text-primary mb-2"}) : <Sparkles className="h-10 w-10 text-primary mb-2" />}
-          <CardTitle className="text-xl md:text-2xl text-primary font-heading mt-2">{initiative.title}</CardTitle>
+          <CardTitle className="text-xl md:text-2xl text-primary font-heading mt-2">{initiative.name || initiative.title}</CardTitle>
+          {isOtherNgo && initiative.focus && <CardDescription className="text-sm text-secondary font-medium">{initiative.focus}</CardDescription>}
         </CardHeader>
         <CardContent className="p-5 md:p-6 flex-grow">
-          <CardDescription className="text-sm text-foreground/80 mb-3 leading-relaxed">{initiative.subtitle || initiative.description.substring(0, 100) + '...'}</CardDescription>
-          {initiative.photos && initiative.photos.length > 0 && (
+          <CardDescription className="text-sm text-foreground/80 mb-3 leading-relaxed">{initiative.subtitle || initiative.description.substring(0, 120) + '...'}</CardDescription>
+          {(initiative.photos && initiative.photos.length > 0) || initiative.logoPlaceholder ? (
              <img  
-                src={initiative.photos[0]} 
-                alt={`${initiative.title} preview`} 
-                className="w-full h-40 object-cover rounded-md mb-3" 
-              src="https://images.unsplash.com/photo-1595872018818-97555653a011" />
+                src={initiative.photos ? initiative.photos[0] : initiative.logoPlaceholder} 
+                alt={`${initiative.name || initiative.title} preview`} 
+                className="w-full h-40 object-contain rounded-md mb-3 bg-muted/30 p-2" 
+              />
+          ) : (
+            <div className="w-full h-40 bg-muted/30 rounded-md mb-3 flex items-center justify-center">
+              <Image className="h-16 w-16 text-muted-foreground/40" />
+            </div>
           )}
         </CardContent>
         <CardFooter className="p-5 md:p-6 border-t border-border/40">
-          <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-lg" asChild>
-            <Link to={`/initiatives-events/${initiative.id}`}>Learn More</Link>
-          </Button>
+          {isOtherNgo ? (
+            <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-lg" asChild>
+              <a href={initiative.volunteerLink || initiative.websiteLink || '#'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                Volunteer/Visit <ExternalLink className="h-4 w-4 ml-2"/>
+              </a>
+            </Button>
+          ) : (
+            <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-lg" asChild>
+              <Link to={`/initiatives-events/${initiative.id}`}>Learn More</Link>
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </motion.custom>
   );
 
+  const renderEventSection = (title, events, icon) => (
+    <SectionWrapper id={title.toLowerCase().replace(/\s+/g, '-')}>
+      <div className="flex items-center mb-8 md:mb-12">
+        {icon}
+        <h2 className="text-2xl md:text-3xl font-semibold text-primary ml-3">{title}</h2>
+      </div>
+      {loadingEvents && (
+        <div className="text-center py-12">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading events...</p>
+        </div>
+      )}
+      {!loadingEvents && events.length === 0 && (
+        <div className="text-center py-12">
+          <AlertTriangle className="h-16 w-16 text-primary/30 mx-auto mb-4" />
+          <p className="text-muted-foreground">No {title.toLowerCase()} to display currently. Check back soon!</p>
+        </div>
+      )}
+      {!loadingEvents && events.length > 0 && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {events.map((event, index) => (
+            <motion.custom key={event.id || `event-${index}`} custom={index} initial="hidden" animate="visible" variants={cardVariants}>
+              <EventCard event={event} />
+            </motion.custom>
+          ))}
+        </div>
+      )}
+    </SectionWrapper>
+  );
 
   return (
     <div className="container mx-auto px-4">
@@ -145,50 +196,50 @@ const InitiativesAndEventsPage = () => {
         <Sparkles className="h-16 w-16 text-primary mx-auto mt-4" />
       </PageHeader>
 
-      <SectionWrapper id="filter-section" className="!py-0 mb-8 md:mb-10">
-        <div className="flex flex-col sm:flex-row items-center justify-between">
-          <h2 className="text-2xl md:text-3xl font-semibold text-primary mb-4 sm:mb-0">Explore Our Work</h2>
-          <div className="relative">
-            <ListFilter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <select 
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              className="pl-10 pr-8 py-2.5 rounded-lg border border-input bg-background text-sm focus:ring-primary focus:border-primary shadow-sm"
-            >
-              {filters.map(filter => (
-                <option key={filter} value={filter}>{filter || 'Uncategorized'}</option>
-              ))}
-            </select>
+      <SectionWrapper id="initiatives-section">
+        <div className="flex items-center mb-8 md:mb-12">
+          <Briefcase className="h-8 w-8 text-primary" />
+          <h2 className="text-2xl md:text-3xl font-semibold text-primary ml-3">Our Core Initiatives</h2>
+        </div>
+        {initiativesToDisplay.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {initiativesToDisplay.map((item, index) => 
+              <InitiativeCard initiative={item} index={index} key={item.id || `init-${index}`} />
+            )}
           </div>
-        </div>
-      </SectionWrapper>
-      
-      {loadingEvents && selectedFilter !== 'Initiatives' && (
-        <div className="text-center py-12">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading awesome events...</p>
-        </div>
-      )}
-
-      {filteredItems.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {filteredItems.map((item, index) => 
-            item.type === 'initiative' 
-            ? <InitiativeCard initiative={item} index={index} key={item.id || `init-${index}`} />
-            : <motion.custom key={item.id || `event-${index}`} custom={index} initial="hidden" animate="visible" variants={cardVariants}><EventCard event={item} /></motion.custom>
-          )}
-        </div>
-      ) : (
-        !loadingEvents && (
+        ) : (
           <div className="text-center py-12">
-            <AlertTriangle className="h-20 w-20 text-primary/30 mx-auto mb-6" />
-            <h3 className="text-2xl font-semibold text-primary mb-2">Nothing Found Here (Yet!)</h3>
-            <p className="text-muted-foreground">
-              It seems there's no content matching "{selectedFilter}". Try a different filter or check back soon for new updates!
-            </p>
+            <AlertTriangle className="h-16 w-16 text-primary/30 mx-auto mb-4" />
+            <p className="text-muted-foreground">Initiative details are being updated. Please check back soon!</p>
           </div>
-        )
-      )}
+        )}
+      </SectionWrapper>
+
+      {renderEventSection("Ongoing Work", displayOngoingEvents, <Clock className="h-8 w-8 text-primary" />)}
+      {renderEventSection("Future Work", displayFutureEvents, <CalendarHeart className="h-8 w-8 text-primary" />)}
+      {renderEventSection("Past Work", displayPastEvents, <CheckCircle className="h-8 w-8 text-primary" />)}
+
+      <SectionWrapper id="other-ngo-initiatives-section" className="bg-accent/5 rounded-xl py-16 md:py-20">
+        <div className="flex items-center mb-8 md:mb-12">
+          <Handshake className="h-8 w-8 text-primary" />
+          <h2 className="text-2xl md:text-3xl font-semibold text-primary ml-3">Other NGO Initiatives We Support</h2>
+        </div>
+        <p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
+          Let's Donate also collaborates with and supports other impactful NGOs. Explore their work and find more ways to contribute to the community.
+        </p>
+        {otherNgoInitiatives.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {otherNgoInitiatives.map((item, index) => 
+              <InitiativeCard initiative={item} index={index} key={item.id || `other-ngo-${index}`} isOtherNgo={true} />
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <AlertTriangle className="h-16 w-16 text-primary/30 mx-auto mb-4" />
+            <p className="text-muted-foreground">Information about other supported NGOs is coming soon!</p>
+          </div>
+        )}
+      </SectionWrapper>
 
       <SectionWrapper id="get-involved-cta" className="text-center mt-16 md:mt-24 bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-xl py-12 md:py-16">
         <CalendarHeart className="h-12 w-12 text-primary mx-auto mb-6" />
