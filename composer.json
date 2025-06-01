@@ -1,0 +1,8 @@
+{
+    "name": "letsdonate/webapp",
+    "description": "Lets Donate Web Application",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    }
+} 
