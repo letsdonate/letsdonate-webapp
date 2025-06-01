@@ -4,15 +4,15 @@ import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, MapPin, Heart, UserCheck, Send, Mail, Phone, Map } from 'lucide-react';
+import { Calendar, Users, MapPin, Heart, UserCheck, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { supabase } from '@/lib/supabaseClient';
 
 const upcomingEvents = [
   { id: 1, title: 'Weekend Wonders Tutoring', date: 'Every Saturday, 10 AM - 12 PM', location: 'Koramangala Community Hall', description: 'Guide young minds in Maths & English. Your 2 hours can ignite a lifetime of learning!', category: 'Education', spots: 8, imagePlaceholder: 'Children happily learning in a bright classroom' },
@@ -28,8 +28,6 @@ const pastVolunteersTestimonials = [
 
 const TimeDonationPage = () => {
   const { toast } = useToast();
-  const [eventRegistrations, setEventRegistrations] = useLocalStorage('eventVolunteerRegistrations', {});
-  const [generalVolunteerApplications, setGeneralVolunteerApplications] = useLocalStorage('generalVolunteerApplications', []);
   
   const [eventRegFormData, setEventRegFormData] = useState({ name: '', email: '', phone: '' });
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -47,7 +45,7 @@ const TimeDonationPage = () => {
     setEventRegFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleEventRegister = (eventId) => {
+  const handleEventRegister = async (eventId) => {
     if (!eventRegFormData.name || !eventRegFormData.email || !eventRegFormData.phone) {
       toast({ title: "Incomplete Form", description: "Please fill in all fields to register for the event.", variant: "destructive" });
       return;
@@ -56,17 +54,29 @@ const TimeDonationPage = () => {
       toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
       return;
     }
-    setEventRegistrations(prev => ({
-      ...prev,
-      [eventId]: [...(prev[eventId] || []), { ...eventRegFormData, registrationDate: new Date().toISOString(), eventTitle: upcomingEvents.find(e=>e.id === eventId)?.title }]
-    }));
-    toast({ 
-      title: "Event Registration Successful! 🎉", 
-      description: `Thank you, ${eventRegFormData.name}, for registering for ${upcomingEvents.find(e=>e.id === eventId)?.title}. We'll contact you soon!`,
-      className: "bg-primary text-primary-foreground"
-    });
-    setSelectedEvent(null); 
-    setEventRegFormData({ name: '', email: '', phone: '' }); 
+
+    const currentEvent = upcomingEvents.find(e => e.id === eventId);
+    const { data, error } = await supabase
+      .from('event_volunteer_registrations')
+      .insert([{ 
+        event_id: eventId.toString(), 
+        event_title: currentEvent?.title,
+        name: eventRegFormData.name, 
+        email: eventRegFormData.email, 
+        phone: eventRegFormData.phone 
+      }]);
+
+    if (error) {
+      toast({ title: "Registration Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ 
+        title: "Event Registration Successful! 🎉", 
+        description: `Thank you, ${eventRegFormData.name}, for registering for ${currentEvent?.title}. We'll contact you soon!`,
+        className: "bg-primary text-primary-foreground"
+      });
+      setSelectedEvent(null); 
+      setEventRegFormData({ name: '', email: '', phone: '' }); 
+    }
   };
 
   const handleGeneralVolunteerInputChange = (e) => {
@@ -74,7 +84,7 @@ const TimeDonationPage = () => {
     setGeneralVolunteerFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleGeneralVolunteerSubmit = (e) => {
+  const handleGeneralVolunteerSubmit = async (e) => {
     e.preventDefault();
     if (!generalVolunteerFormData.fullName || !generalVolunteerFormData.email || !generalVolunteerFormData.phoneNumber) {
       toast({ title: "Incomplete Form", description: "Please fill in Full Name, Email, and Phone Number.", variant: "destructive" });
@@ -85,21 +95,28 @@ const TimeDonationPage = () => {
       return;
     }
     
-    const newApplication = { ...generalVolunteerFormData, submissionDate: new Date().toISOString() };
-    setGeneralVolunteerApplications(prev => [...prev, newApplication]);
+    const { data, error } = await supabase
+      .from('volunteer_applications')
+      .insert([{ 
+        full_name: generalVolunteerFormData.fullName, 
+        email: generalVolunteerFormData.email, 
+        phone_number: generalVolunteerFormData.phoneNumber,
+        city: generalVolunteerFormData.city,
+        reason_to_volunteer: generalVolunteerFormData.reasonToVolunteer
+      }]);
 
-    toast({
-      title: "Application Submitted! 🙌",
-      description: `Thank you, ${generalVolunteerFormData.fullName}! We've received your volunteer application and will be in touch soon.`,
-      className: "bg-primary text-primary-foreground",
-      duration: 7000
-    });
-    // Simulate sending email to admin (console log for now)
-    console.log("New General Volunteer Application (Simulated Email to Admin):", newApplication);
-
-    setGeneralVolunteerFormData({ fullName: '', email: '', phoneNumber: '', city: '', reasonToVolunteer: '' });
+    if (error) {
+      toast({ title: "Application Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({
+        title: "Application Submitted! 🙌",
+        description: `Thank you, ${generalVolunteerFormData.fullName}! We've received your volunteer application and will be in touch soon.`,
+        className: "bg-primary text-primary-foreground",
+        duration: 7000
+      });
+      setGeneralVolunteerFormData({ fullName: '', email: '', phoneNumber: '', city: '', reasonToVolunteer: '' });
+    }
   };
-
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },

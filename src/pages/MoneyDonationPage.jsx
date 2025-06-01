@@ -10,7 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { DollarSign, Gift, BookOpen, Smile, BarChart3, Info, Phone, QrCode, ShieldCheck, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { supabase } from '@/lib/supabaseClient';
 
 const donationTiers = [
   { amount: 200, impact: '5 notebooks for students', icon: <BookOpen className="h-6 w-6 text-primary" /> },
@@ -28,7 +28,6 @@ const whereMoneyGoes = [
 const RAZORPAY_KEY_ID = 'YOUR_RAZORPAY_KEY_ID'; // Placeholder
 
 const MoneyDonationPage = () => {
-  const [moneyDonations, setMoneyDonations] = useLocalStorage('moneyDonationSubmissions', []);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -61,6 +60,18 @@ const MoneyDonationPage = () => {
     setFormData(prev => ({ ...prev, amount: tierAmount.toString() }));
   };
 
+  const saveDonationToSupabase = async (donationData) => {
+    const { data, error } = await supabase
+      .from('money_donations')
+      .insert([donationData]);
+    if (error) {
+      console.error("Supabase save error:", error);
+      toast({ title: "Database Save Error", description: "Could not save donation to database. " + error.message, variant: "destructive" });
+    } else {
+      console.log("Money Donation saved to Supabase:", data);
+    }
+  };
+
   const processRazorpayPayment = (numericAmount) => {
     if (RAZORPAY_KEY_ID === 'YOUR_RAZORPAY_KEY_ID') {
       toast({
@@ -75,31 +86,44 @@ const MoneyDonationPage = () => {
         variant: "destructive",
         duration: 9000,
       });
-      // Simulate successful donation for UI
-      const newDonation = { ...formData, amount: numericAmount, paymentMethod: 'razorpay', paymentStatus: 'Simulated Success - Razorpay Misconfigured', submissionDate: new Date().toISOString() };
-      setMoneyDonations(prev => [...prev, newDonation]);
-      console.log("Money Donation Data (Razorpay Simulated - Misconfigured):", newDonation);
+      const simulatedDonation = { 
+        name: formData.name, 
+        email: formData.email, 
+        phone: formData.phone, 
+        amount: numericAmount, 
+        payment_method: 'razorpay', 
+        payment_status: 'Simulated Success - Razorpay Misconfigured', 
+        message: formData.message
+      };
+      saveDonationToSupabase(simulatedDonation);
       return;
     }
     
     const options = {
       key: RAZORPAY_KEY_ID, 
-      amount: numericAmount * 100, // Amount in paise
+      amount: numericAmount * 100, 
       currency: "INR",
       name: "Let's Donate",
       description: "Donation for a cause",
-      image: "/logo-icon.svg", // Your logo
+      image: "/logo-icon.svg", 
       handler: function (response) {
-        // This function is called on successful payment
         toast({
           title: "Payment Successful! 💖",
           description: `Thank you, ${formData.name}! Your donation of ₹${numericAmount} via Razorpay was successful. Payment ID: ${response.razorpay_payment_id}`,
           className: "bg-primary text-primary-foreground",
           duration: 9000,
         });
-        const newDonation = { ...formData, amount: numericAmount, paymentMethod: 'razorpay', paymentId: response.razorpay_payment_id, paymentStatus: 'Success', submissionDate: new Date().toISOString() };
-        setMoneyDonations(prev => [...prev, newDonation]);
-        console.log("Money Donation Data (Razorpay Success):", newDonation);
+        const successfulDonation = { 
+          name: formData.name, 
+          email: formData.email, 
+          phone: formData.phone, 
+          amount: numericAmount, 
+          payment_method: 'razorpay', 
+          payment_id: response.razorpay_payment_id, 
+          payment_status: 'Success', 
+          message: formData.message
+        };
+        saveDonationToSupabase(successfulDonation);
         setFormData({ name: '', email: '', phone: '', amount: '', paymentMethod: 'stripe', message: '' });
       },
       prefill: {
@@ -111,7 +135,7 @@ const MoneyDonationPage = () => {
         address: "Let's Donate Office"
       },
       theme: {
-        color: "#008080" // Teal color
+        color: "#008080"
       }
     };
     const rzp = new window.Razorpay(options);
@@ -122,9 +146,16 @@ const MoneyDonationPage = () => {
         variant: "destructive",
         duration: 9000,
       });
-      console.error("Razorpay Payment Failed:", response.error);
-      const newDonation = { ...formData, amount: numericAmount, paymentMethod: 'razorpay', paymentStatus: 'Failed', error: response.error, submissionDate: new Date().toISOString() };
-      setMoneyDonations(prev => [...prev, newDonation]);
+      const failedDonation = { 
+        name: formData.name, 
+        email: formData.email, 
+        phone: formData.phone, 
+        amount: numericAmount, 
+        payment_method: 'razorpay', 
+        payment_status: 'Failed', 
+        message: `Razorpay Error: ${response.error.code} - ${response.error.description}`
+      };
+      saveDonationToSupabase(failedDonation);
     });
     rzp.open();
   };
@@ -141,6 +172,15 @@ const MoneyDonationPage = () => {
       return;
     }
 
+    const donationData = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      amount: numericAmount,
+      payment_method: formData.paymentMethod,
+      message: formData.message
+    };
+
     if (formData.paymentMethod === 'razorpay') {
       processRazorpayPayment(numericAmount);
     } else if (formData.paymentMethod === 'stripe') {
@@ -156,24 +196,16 @@ const MoneyDonationPage = () => {
         className: "bg-primary text-primary-foreground",
         duration: 9000,
       });
-      const newDonation = { ...formData, amount: numericAmount, paymentStatus: 'Simulated Success - Stripe', submissionDate: new Date().toISOString() };
-      setMoneyDonations(prev => [...prev, newDonation]);
-      console.log("Money Donation Data (Stripe Simulated):", newDonation);
-      // setFormData({ name: '', email: '', phone: '', amount: '', paymentMethod: 'stripe', message: '' }); // Reset if you want
+      saveDonationToSupabase({ ...donationData, payment_status: 'Simulated Success - Stripe' });
     } else {
-      // For UPI/QR or Bank Transfer (no actual payment processing here, just recording intent)
       toast({
         title: "Donation Intent Recorded",
         description: `Thank you, ${formData.name}! Your intent to donate ₹${numericAmount} via ${formData.paymentMethod} is noted. Please follow the instructions shown for this payment method.`,
         className: "bg-primary text-primary-foreground",
         duration: 9000,
       });
-      const newDonation = { ...formData, amount: numericAmount, paymentStatus: 'Pending - Manual Payment', submissionDate: new Date().toISOString() };
-      setMoneyDonations(prev => [...prev, newDonation]);
-      console.log("Money Donation Data (Manual):", newDonation);
+      saveDonationToSupabase({ ...donationData, payment_status: 'Pending - Manual Payment' });
     }
-     // Simulate sending email to admin (console log for now)
-    console.log("New Money Donation Submission (Simulated Email to Admin):", { ...formData, amount: numericAmount, submissionDate: new Date().toISOString() });
   };
 
   const cardVariants = {
