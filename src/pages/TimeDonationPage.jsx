@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, MapPin, Heart, UserCheck, Send } from 'lucide-react';
+import { Calendar, Users, MapPin, Heart, UserCheck, Send, Loader2, BookHeart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -14,11 +14,27 @@ import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/lib/supabaseClient';
 
-const upcomingEvents = [
-  { id: 1, title: 'Weekend Wonders Tutoring', date: 'Every Saturday, 10 AM - 12 PM', location: 'Koramangala Community Hall', description: 'Guide young minds in Maths & English. Your 2 hours can ignite a lifetime of learning!', category: 'Education', spots: 8, imagePlaceholder: 'Children happily learning in a bright classroom' },
-  { id: 2, title: 'Creative Canvas Workshop', date: 'July 13, 2025, 2 PM - 4:30 PM', location: 'Indiranagar Art Studio', description: 'Unleash creativity! Assist kids in painting, drawing, and craft activities.', category: 'Arts & Creativity', spots: 6, imagePlaceholder: 'Kids engaged in colorful art activities' },
-  { id: 3, title: 'Green Guardians Park Cleanup', date: 'July 20, 2025, 8 AM - 10 AM', location: 'Lalbagh Botanical Garden', description: 'Join us to beautify our beloved park. Gloves and tools provided!', category: 'Environment', spots: 15, imagePlaceholder: 'Volunteers cleaning a park with smiles' },
-];
+const MINIMUM_EVENTS_DISPLAY = 3; // For this page, maybe fewer placeholders are fine
+
+const placeholderEventTemplate = {
+  id: null,
+  title: 'New Volunteering Opportunity Soon!',
+  date: 'Date TBD',
+  location: 'Location TBD',
+  description: 'We are planning exciting new ways for you to contribute your time. Details will be posted here shortly!',
+  category: 'Upcoming',
+  spots: 0,
+  imagePlaceholder: 'Group of diverse volunteers working together'
+};
+
+const generatePlaceholders = (count) => {
+  return Array.from({ length: count }, (_, i) => ({
+    ...placeholderEventTemplate,
+    id: `placeholder-event-${i}`,
+    title: `Volunteering Placeholder ${i + 1}`,
+  }));
+};
+
 
 const pastVolunteersTestimonials = [
   { name: 'Priya Sharma', testimonial: 'The tutoring program is so well-organized. Seeing the children grasp new concepts because of my help is incredibly fulfilling!', imagePlaceholder: 'Smiling female volunteer with a child', role: 'Education Volunteer', avatarFallback: 'PS' },
@@ -28,6 +44,8 @@ const pastVolunteersTestimonials = [
 
 const TimeDonationPage = () => {
   const { toast } = useToast();
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   
   const [eventRegFormData, setEventRegFormData] = useState({ name: '', email: '', phone: '' });
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -37,8 +55,37 @@ const TimeDonationPage = () => {
     email: '',
     phoneNumber: '',
     city: '',
+    areaOfInterest: '', // New field
     reasonToVolunteer: ''
   });
+
+  const fetchUpcomingEvents = useCallback(async () => {
+    setLoadingEvents(true);
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .gte('date', new Date().toISOString()) // Only future or ongoing events
+      .order('date', { ascending: true })
+      .limit(6); // Limit to a reasonable number for this page
+
+    if (error) {
+      toast({ title: 'Error fetching upcoming events', description: error.message, variant: 'destructive' });
+      setUpcomingEvents(generatePlaceholders(MINIMUM_EVENTS_DISPLAY));
+    } else {
+      if (data.length < MINIMUM_EVENTS_DISPLAY) {
+        const placeholdersNeeded = MINIMUM_EVENTS_DISPLAY - data.length;
+        setUpcomingEvents([...data, ...generatePlaceholders(placeholdersNeeded)]);
+      } else {
+        setUpcomingEvents(data);
+      }
+    }
+    setLoadingEvents(false);
+  }, [toast]);
+
+  useEffect(() => {
+    fetchUpcomingEvents();
+  }, [fetchUpcomingEvents]);
+
 
   const handleEventRegInputChange = (e) => {
     const { name, value } = e.target;
@@ -102,6 +149,7 @@ const TimeDonationPage = () => {
         email: generalVolunteerFormData.email, 
         phone_number: generalVolunteerFormData.phoneNumber,
         city: generalVolunteerFormData.city,
+        area_of_interest: generalVolunteerFormData.areaOfInterest,
         reason_to_volunteer: generalVolunteerFormData.reasonToVolunteer
       }]);
 
@@ -114,7 +162,7 @@ const TimeDonationPage = () => {
         className: "bg-primary text-primary-foreground",
         duration: 7000
       });
-      setGeneralVolunteerFormData({ fullName: '', email: '', phoneNumber: '', city: '', reasonToVolunteer: '' });
+      setGeneralVolunteerFormData({ fullName: '', email: '', phoneNumber: '', city: '', areaOfInterest: '', reasonToVolunteer: '' });
     }
   };
 
@@ -135,68 +183,91 @@ const TimeDonationPage = () => {
 
       <SectionWrapper id="current-events">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Upcoming Volunteering Events</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {upcomingEvents.map((event, index) => (
-            <motion.custom 
-              key={event.id} 
-              custom={index} 
-              initial="hidden" 
-              whileInView="visible" 
-              viewport={{ once: true, amount: 0.2 }} 
-              variants={cardVariants}
-              className="h-full"
-            >
-              <Card className="h-full flex flex-col rounded-xl shadow-soft hover:shadow-soft-hover transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-                <div className="aspect-video overflow-hidden">
-                  <img  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={event.title} src="https://images.unsplash.com/photo-1595872018818-97555653a011" />
-                </div>
-                <CardHeader className="pt-6">
-                  <CardTitle className="text-xl lg:text-2xl text-primary">{event.title}</CardTitle>
-                  <CardDescription className="text-sm text-secondary font-semibold">{event.category}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow space-y-3">
-                  <p className="flex items-center text-sm text-muted-foreground"><Calendar className="h-4 w-4 mr-2 text-primary/70" /> {event.date}</p>
-                  <p className="flex items-center text-sm text-muted-foreground"><MapPin className="h-4 w-4 mr-2 text-primary/70" /> {event.location}</p>
-                  <p className="text-sm text-muted-foreground">{event.description}</p>
-                  <p className="text-sm font-medium text-primary"><Users className="h-4 w-4 mr-2 inline" /> {event.spots} spots available</p>
-                </CardContent>
-                <CardFooter className="p-6">
-                  <Dialog open={selectedEvent === event.id} onOpenChange={(isOpen) => !isOpen && setSelectedEvent(null)}>
-                    <DialogTrigger asChild>
-                      <Button className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground" onClick={() => setSelectedEvent(event.id)}>
-                        <UserCheck className="h-5 w-5 mr-2" /> Register for Event
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md rounded-xl shadow-soft">
-                      <DialogHeader className="mb-4">
-                        <DialogTitle className="text-2xl text-primary">Register for: {event.title}</DialogTitle>
-                        <DialogDescription className="text-muted-foreground">Fill in your details. We're excited to have you on board!</DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-2">
-                        <div className="space-y-1">
-                          <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
-                          <Input id="name" name="name" value={eventRegFormData.name} onChange={handleEventRegInputChange} className="rounded-lg" placeholder="E.g., Priya Sharma" required />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
-                          <Input id="email" name="email" type="email" value={eventRegFormData.email} onChange={handleEventRegInputChange} className="rounded-lg" placeholder="E.g., priya@example.com" required />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
-                          <Input id="phone" name="phone" type="tel" value={eventRegFormData.phone} onChange={handleEventRegInputChange} className="rounded-lg" placeholder="E.g., 9876543210" required />
-                        </div>
-                      </div>
-                      <DialogFooter className="mt-6">
-                        <Button type="button" variant="outline" className="rounded-lg" onClick={() => setSelectedEvent(null)}>Cancel</Button>
-                        <Button type="submit" className="rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground" onClick={() => handleEventRegister(event.id)}>Submit Registration</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </CardFooter>
-              </Card>
-            </motion.custom>
-          ))}
-        </div>
+        {loadingEvents ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">Loading upcoming events...</span>
+          </div>
+        ) : upcomingEvents.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {upcomingEvents.map((event, index) => (
+              <motion.custom 
+                key={event.id || `event-${index}`} 
+                custom={index} 
+                initial="hidden" 
+                whileInView="visible" 
+                viewport={{ once: true, amount: 0.2 }} 
+                variants={cardVariants}
+                className="h-full"
+              >
+                <Card className="h-full flex flex-col rounded-xl shadow-soft hover:shadow-soft-hover transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+                  <div className="aspect-video overflow-hidden bg-muted">
+                    <img  
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                      alt={event.title} 
+                      src={event.images && event.images.length > 0 ? event.images[0] : `https://images.unsplash.com/photo-1595872018818-97555653a011?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600&h=300&fit=crop&auto=format&description=${encodeURIComponent(event.imagePlaceholder || event.title)}`} 
+                    />
+                  </div>
+                  <CardHeader className="pt-6">
+                    <CardTitle className="text-xl lg:text-2xl text-primary">{event.title}</CardTitle>
+                    <CardDescription className="text-sm text-secondary font-semibold">{event.category}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-grow space-y-3">
+                    <p className="flex items-center text-sm text-muted-foreground"><Calendar className="h-4 w-4 mr-2 text-primary/70" /> {event.date && event.id ? new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : event.date}</p>
+                    <p className="flex items-center text-sm text-muted-foreground"><MapPin className="h-4 w-4 mr-2 text-primary/70" /> {event.location}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-3">{event.description}</p>
+                    {event.id && <p className="text-sm font-medium text-primary"><Users className="h-4 w-4 mr-2 inline" /> {event.spots || 'Limited'} spots available</p>}
+                  </CardContent>
+                  {event.id && ( // Only show register button for real events
+                    <CardFooter className="p-6">
+                      <Dialog open={selectedEvent === event.id} onOpenChange={(isOpen) => !isOpen && setSelectedEvent(null)}>
+                        <DialogTrigger asChild>
+                          <Button className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground" onClick={() => setSelectedEvent(event.id)}>
+                            <UserCheck className="h-5 w-5 mr-2" /> Register for Event
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md rounded-xl shadow-soft">
+                          <DialogHeader className="mb-4">
+                            <DialogTitle className="text-2xl text-primary">Register for: {event.title}</DialogTitle>
+                            <DialogDescription className="text-muted-foreground">Fill in your details. We're excited to have you on board!</DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-2">
+                            <div className="space-y-1">
+                              <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                              <Input id="name" name="name" value={eventRegFormData.name} onChange={handleEventRegInputChange} className="rounded-lg" placeholder="E.g., Priya Sharma" required />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                              <Input id="email" name="email" type="email" value={eventRegFormData.email} onChange={handleEventRegInputChange} className="rounded-lg" placeholder="E.g., priya@example.com" required />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+                              <Input id="phone" name="phone" type="tel" value={eventRegFormData.phone} onChange={handleEventRegInputChange} className="rounded-lg" placeholder="E.g., 9876543210" required />
+                            </div>
+                          </div>
+                          <DialogFooter className="mt-6">
+                            <Button type="button" variant="outline" className="rounded-lg" onClick={() => setSelectedEvent(null)}>Cancel</Button>
+                            <Button type="submit" className="rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground" onClick={() => handleEventRegister(event.id)}>Submit Registration</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </CardFooter>
+                  )}
+                </Card>
+              </motion.custom>
+            ))}
+          </div>
+        ) : (
+           <Card className="text-center py-10 shadow-soft">
+             <CardHeader>
+                <Calendar className="mx-auto h-10 w-10 text-secondary mb-3" />
+                <CardTitle className="text-xl">No Upcoming Events</CardTitle>
+             </CardHeader>
+             <CardContent>
+                <CardDescription>Check back soon for new volunteering opportunities, or fill out the general volunteer form below!</CardDescription>
+             </CardContent>
+          </Card>
+        )}
       </SectionWrapper>
 
       <SectionWrapper id="become-a-volunteer" className="bg-secondary/10 rounded-xl py-16 md:py-20">
@@ -220,9 +291,15 @@ const TimeDonationPage = () => {
                 <Input id="phoneNumber" name="phoneNumber" type="tel" value={generalVolunteerFormData.phoneNumber} onChange={handleGeneralVolunteerInputChange} placeholder="E.g., 9876543210" required className="mt-1 rounded-lg"/>
               </div>
             </div>
-            <div>
-              <Label htmlFor="city" className="font-medium">City (Optional)</Label>
-              <Input id="city" name="city" value={generalVolunteerFormData.city} onChange={handleGeneralVolunteerInputChange} placeholder="E.g., Bangalore" className="mt-1 rounded-lg"/>
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="city" className="font-medium">City (Optional)</Label>
+                <Input id="city" name="city" value={generalVolunteerFormData.city} onChange={handleGeneralVolunteerInputChange} placeholder="E.g., Bangalore" className="mt-1 rounded-lg"/>
+              </div>
+              <div>
+                <Label htmlFor="areaOfInterest" className="font-medium">Area of Interest (Optional)</Label>
+                <Input id="areaOfInterest" name="areaOfInterest" value={generalVolunteerFormData.areaOfInterest} onChange={handleGeneralVolunteerInputChange} placeholder="E.g., Teaching, Event Management" className="mt-1 rounded-lg"/>
+              </div>
             </div>
             <div>
               <Label htmlFor="reasonToVolunteer" className="font-medium">Why do you want to volunteer? (Optional)</Label>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Users, Info, Image, MessageCircle, ChevronDown, Clock, Gift, DollarSign, Home as HomeIcon } from 'lucide-react';
+import { Menu, X, Users, Info, Image, MessageCircle, ChevronDown, Clock, Gift, DollarSign, Home as HomeIcon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -14,9 +14,10 @@ const mainNavLinksBeforeDonate = [
   { to: '/', label: 'Home', icon: <HomeIcon className="h-5 w-5 mr-2 md:hidden" /> },
 ];
 
+// Updated mainNavLinksAfterDonate to reflect merged page
 const mainNavLinksAfterDonate = [
   { to: '/about-us', label: 'About Us', icon: <Info className="h-5 w-5 mr-2 md:hidden" /> },
-  { to: '/events-gallery', label: 'Events & Gallery', icon: <Image className="h-5 w-5 mr-2 md:hidden" /> },
+  { to: '/initiatives-events', label: 'Initiatives & Events', icon: <Sparkles className="h-5 w-5 mr-2 md:hidden" /> }, // Updated Link
   { to: '/social-change-circle', label: 'Social Circle', icon: <Users className="h-5 w-5 mr-2 md:hidden" /> },
 ];
 

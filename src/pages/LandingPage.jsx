@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'; // Added CardFooter
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
-import { Clock, DollarSign, Gift, Users, BookOpen, Home, Eye } from 'lucide-react';
+import { Clock, DollarSign, Gift, Users, BookOpen, Home, Eye, Send, BookHeart } from 'lucide-react'; // Added Send, BookHeart
 import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input'; // Added Input
+import { Label } from '@/components/ui/label'; // Added Label
+import { Textarea } from '@/components/ui/textarea'; // Added Textarea
+import { useToast } from '@/components/ui/use-toast'; // Added useToast
+import { supabase } from '@/lib/supabaseClient'; // Added supabase
 
 const donationOptions = [
   { title: 'Donate Time', description: 'Volunteer your skills and become part of our mission.', icon: <Clock className="h-10 w-10 text-primary mb-4" />, link: '/donate/time', cta: 'Volunteer Now' },
@@ -24,6 +29,91 @@ const galleryImages = [
   { srcPlaceholder: "Volunteers distributing supplies to a community", alt: "Volunteers distributing supplies" },
   { srcPlaceholder: "A group of happy volunteers posing together", alt: "Happy volunteers group photo" },
 ];
+
+// Volunteer Form Component (can be extracted to its own file later)
+const VolunteerFormSection = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    areaOfInterest: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.fullName || !formData.email || !formData.phoneNumber) {
+      toast({ title: "Incomplete Form", description: "Please fill in Full Name, Email, and Phone Number.", variant: "destructive" });
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
+    
+    const { data, error } = await supabase
+      .from('volunteer_applications')
+      .insert([{ 
+        full_name: formData.fullName, 
+        email: formData.email, 
+        phone_number: formData.phoneNumber,
+        area_of_interest: formData.areaOfInterest,
+        // 'reason_to_volunteer' and 'city' are not in this simplified form
+      }]);
+
+    if (error) {
+      toast({ title: "Application Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({
+        title: "Application Submitted! 🙌",
+        description: `Thank you, ${formData.fullName}! We've received your volunteer application and will be in touch soon.`,
+        className: "bg-primary text-primary-foreground",
+        duration: 7000
+      });
+      setFormData({ fullName: '', email: '', phoneNumber: '', areaOfInterest: '' });
+    }
+  };
+
+  return (
+    <SectionWrapper id="home-volunteer-form" className="bg-secondary/10 rounded-xl py-16 md:py-20">
+      <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-4">Become a Volunteer Today</h2>
+      <p className="text-center text-muted-foreground mb-12 md:mb-16 max-w-xl mx-auto">
+        Join our passionate team and make a direct impact. Fill out the form below to get started!
+      </p>
+      <Card className="max-w-2xl mx-auto p-6 sm:p-8 rounded-xl shadow-soft bg-background">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <Label htmlFor="home-fullName" className="font-medium">Full Name <span className="text-destructive">*</span></Label>
+            <Input id="home-fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="E.g., Priya Sharma" required className="mt-1 rounded-lg"/>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="home-email" className="font-medium">Email Address <span className="text-destructive">*</span></Label>
+              <Input id="home-email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="E.g., priya@example.com" required className="mt-1 rounded-lg"/>
+            </div>
+            <div>
+              <Label htmlFor="home-phoneNumber" className="font-medium">Phone Number <span className="text-destructive">*</span></Label>
+              <Input id="home-phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="E.g., 9876543210" required className="mt-1 rounded-lg"/>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="home-areaOfInterest" className="font-medium">Area of Interest (Optional)</Label>
+            <Input id="home-areaOfInterest" name="areaOfInterest" value={formData.areaOfInterest} onChange={handleInputChange} placeholder="E.g., Teaching, Event Support, Creative Arts" className="mt-1 rounded-lg"/>
+          </div>
+          <Button type="submit" size="lg" className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground py-3 text-base">
+            <Send className="h-5 w-5 mr-2" /> Submit Application
+          </Button>
+        </form>
+      </Card>
+    </SectionWrapper>
+  );
+};
+
 
 const LandingPage = () => {
   const cardVariants = {
@@ -126,16 +216,19 @@ const LandingPage = () => {
                 <CardContent className="flex-grow">
                   <CardDescription className="text-base text-muted-foreground">{option.description}</CardDescription>
                 </CardContent>
-                <CardContent className="pb-8">
+                <CardFooter className="p-6 pb-8"> {/* Adjusted padding */}
                   <Button asChild className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground">
                     <Link to={option.link}>{option.cta}</Link>
                   </Button>
-                </CardContent>
+                </CardFooter>
               </Card>
             </motion.custom>
           ))}
         </div>
       </SectionWrapper>
+
+      {/* Volunteer Form Section added to Landing Page */}
+      <VolunteerFormSection />
 
       {/* Gallery Preview Section */}
       <SectionWrapper id="gallery-preview" className="bg-secondary/10 rounded-xl py-16 md:py-20">
