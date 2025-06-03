@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
-import { Clock, DollarSign, Gift, Users, BookOpen, Home, Eye, Send, BookHeart, CheckSquare, CalendarDays, Users2, HelpCircle, UserPlus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Clock, DollarSign, Gift, Users, BookOpen, Home, Eye, Send, BookHeart, CheckSquare, CalendarDays, Users2, HelpCircle, UserPlus, Cake, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,11 +13,51 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabaseClient';
 import { Checkbox } from "@/components/ui/checkbox";
 
+const heroSlidesData = [
+  {
+    titlePart1: "Be the reason someone believes in",
+    titleHighlight: "kindness",
+    titlePart2: "again.",
+    subtitle: "Join Let's Donate and make a tangible difference in the lives of those who need it most.",
+    buttonText: "Join as a Volunteer",
+    buttonLink: "/donate/time",
+    imageSrc: "https://images.unsplash.com/photo-1642420290986-c7a55bab708f" 
+  },
+  {
+    titlePart1: "Make your special day",
+    titleHighlight: "meaningful",
+    titlePart2: ".",
+    subtitle: "Celebrate your birthday by supporting a cause close to your heart. Spread joy with Let's Donate.",
+    buttonText: "Celebrate With Us",
+    buttonLink: "/celebrate-birthday",
+    imageSrc: "https://images.unsplash.com/photo-1560439514-e960a3ef50d9" 
+  },
+  {
+    titlePart1: "Every",
+    titleHighlight: "contribution",
+    titlePart2: "counts.",
+    subtitle: "Your financial support empowers our projects and helps us reach more communities in need.",
+    buttonText: "Donate Funds",
+    buttonLink: "/donate/money",
+    imageSrc: "https://images.unsplash.com/photo-1604594899087-9852147a1136" 
+  },
+  {
+    titlePart1: "Share your",
+    titleHighlight: "resources",
+    titlePart2: ".",
+    subtitle: "Donate materials like books, clothes, or toys and directly impact someone's life.",
+    buttonText: "Gift Items",
+    buttonLink: "/donate/material",
+    imageSrc: "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8" 
+  },
+];
+
 
 const donationOptions = [
   { title: 'Donate Time', description: 'Volunteer your skills and become part of our mission.', icon: <Clock className="h-10 w-10 text-primary mb-4" />, link: '/donate/time', cta: 'Volunteer Now' },
   { title: 'Donate Material', description: 'Gift essentials like books, clothes, and toys.', icon: <Gift className="h-10 w-10 text-primary mb-4" />, link: '/donate/material', cta: 'Gift Items' },
   { title: 'Donate Money', description: 'Support our projects financially for direct impact.', icon: <DollarSign className="h-10 w-10 text-primary mb-4" />, link: '/donate/money', cta: 'Give Financially' },
+  { title: 'Celebrate With Us', description: 'Make your special occasions meaningful by giving back.', icon: <Cake className="h-10 w-10 text-primary mb-4" />, link: '/celebrate-birthday', cta: 'Celebrate & Donate' },
 ];
 
 const achievements = [
@@ -109,7 +149,7 @@ const VolunteerFormSection = ({ formIdPrefix = "home" }) => {
         age: parseInt(formData.age),
         areas_of_interest: finalAreasOfInterest,
         availability: formData.availability,
-        reason_to_volunteer: formData.whyVolunteer, // Ensure this matches DB column name
+        reason_to_volunteer: formData.whyVolunteer,
         how_they_heard: formData.howHeard,
       }]);
 
@@ -206,6 +246,27 @@ const VolunteerFormSection = ({ formIdPrefix = "home" }) => {
 
 
 const LandingPage = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slideIntervalRef = useRef(null);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlidesData.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlidesData.length) % heroSlidesData.length);
+  };
+
+  useEffect(() => {
+    slideIntervalRef.current = setInterval(nextSlide, 7000); // Change slide every 7 seconds
+    return () => clearInterval(slideIntervalRef.current);
+  }, []);
+
+  const handleManualNavigation = () => {
+    clearInterval(slideIntervalRef.current);
+    slideIntervalRef.current = setInterval(nextSlide, 10000); // Reset interval after manual navigation
+  };
+  
   const cardVariants = {
     hidden: { opacity: 0, y: 30, scale: 0.95 },
     visible: (i) => ({
@@ -220,32 +281,86 @@ const LandingPage = () => {
     }),
   };
 
+  const slideContentVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.4, ease: "easeIn" } }
+  };
+
   return (
     <div className="space-y-16 md:space-y-24">
       <SectionWrapper fullWidth className="!py-0 relative min-h-[70vh] md:min-h-[85vh] flex items-center justify-center text-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img 
-            className="w-full h-full object-cover object-center"
-            alt="Joyful volunteering moment with children smiling"
-           src="https://images.unsplash.com/photo-1642420290986-c7a55bab708f" />
-          <div className="absolute inset-0 teal-overlay-gradient z-10"></div>
+        <AnimatePresence initial={false} mode="wait">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 z-0"
+          >
+            <img 
+              className="w-full h-full object-cover object-center"
+              alt={heroSlidesData[currentSlide].titleHighlight}
+              src={heroSlidesData[currentSlide].imageSrc} 
+            />
+            <div className="absolute inset-0 teal-overlay-gradient z-10"></div>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="relative z-20 container mx-auto px-4 py-10 text-white">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              variants={slideContentVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight shadow-text">
+                {heroSlidesData[currentSlide].titlePart1}{' '}
+                <span className="text-secondary">{heroSlidesData[currentSlide].titleHighlight}</span>{' '}
+                {heroSlidesData[currentSlide].titlePart2}
+              </h1>
+              <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto font-light">
+                {heroSlidesData[currentSlide].subtitle}
+              </p>
+              <Button 
+                size="lg" 
+                asChild 
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-xl px-10 py-3 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105"
+              >
+                <Link to={heroSlidesData[currentSlide].buttonLink}>{heroSlidesData[currentSlide].buttonText}</Link>
+              </Button>
+            </motion.div>
+          </AnimatePresence>
         </div>
-        <motion.div 
-          className="relative z-20 container mx-auto px-4 py-10 text-white"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+        
+        {/* Carousel Navigation */}
+        <button 
+            onClick={() => { prevSlide(); handleManualNavigation(); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full transition-colors"
+            aria-label="Previous slide"
         >
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight shadow-text">
-            Be the reason someone believes in <span className="text-secondary">kindness</span> again.
-          </h1>
-          <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto font-light">
-            Join Let's Donate and make a tangible difference in the lives of those who need it most.
-          </p>
-          <Button size="lg" asChild className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-xl px-10 py-3 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105">
-            <Link to="/donate/time">Join as a Volunteer</Link>
-          </Button>
-        </motion.div>
+            <ChevronLeft size={28} />
+        </button>
+        <button 
+            onClick={() => { nextSlide(); handleManualNavigation(); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full transition-colors"
+            aria-label="Next slide"
+        >
+            <ChevronRight size={28} />
+        </button>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
+            {heroSlidesData.map((_, index) => (
+                <button
+                    key={index}
+                    onClick={() => { setCurrentSlide(index); handleManualNavigation(); }}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-secondary scale-125' : 'bg-white/50 hover:bg-white/80'}`}
+                    aria-label={`Go to slide ${index + 1}`}
+                />
+            ))}
+        </div>
       </SectionWrapper>
 
       <SectionWrapper id="about-intro">
@@ -283,7 +398,7 @@ const LandingPage = () => {
       
       <SectionWrapper id="how-to-help">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">How Can You Help?</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"> {/* Changed to 4 columns for the new option */}
           {donationOptions.map((option, index) => (
             <motion.custom
               key={option.title}
@@ -353,4 +468,4 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
-export { VolunteerFormSection }; // Export for use in TimeDonationPage
+export { VolunteerFormSection };

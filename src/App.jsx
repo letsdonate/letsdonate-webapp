@@ -5,9 +5,12 @@ import LandingPage from '@/pages/LandingPage';
 import TimeDonationPage from '@/pages/TimeDonationPage';
 import MoneyDonationPage from '@/pages/MoneyDonationPage';
 import MaterialDonationPage from '@/pages/MaterialDonationPage';
+import CelebrateBirthdayPage from '@/pages/CelebrateBirthdayPage'; // New Page
 import AboutUsPage from '@/pages/AboutUsPage';
 import InitiativesAndEventsPage from '@/pages/InitiativesAndEventsPage';
-import InitiativeDetailPage from '@/pages/InitiativeDetailPage'; // Added for individual initiative view
+import InitiativeDetailPage from '@/pages/InitiativeDetailPage';
+import NgoNetworkPage from '@/pages/NgoNetworkPage'; // New Page
+import NgoProfilePage from '@/pages/NgoProfilePage'; // New Page
 import SocialChangeCirclePage from '@/pages/SocialChangeCirclePage';
 import PoliciesPage from '@/pages/PoliciesPage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -22,9 +25,12 @@ function App() {
           <Route path="/donate/time" element={<TimeDonationPage />} />
           <Route path="/donate/money" element={<MoneyDonationPage />} />
           <Route path="/donate/material" element={<MaterialDonationPage />} />
+          <Route path="/celebrate-birthday" element={<CelebrateBirthdayPage />} /> {/* New Route */}
           <Route path="/about-us" element={<AboutUsPage />} />
           <Route path="/initiatives-events" element={<InitiativesAndEventsPage />} />
-          <Route path="/initiatives-events/:initiativeId" element={<InitiativeDetailPage />} /> {/* Route for initiative details */}
+          <Route path="/initiatives-events/:initiativeId" element={<InitiativeDetailPage />} />
+          <Route path="/ngo-network" element={<NgoNetworkPage />} /> {/* New Route */}
+          <Route path="/ngo-network/:slug" element={<NgoProfilePage />} /> {/* New Route */}
           <Route path="/social-change-circle" element={<SocialChangeCirclePage />} />
           <Route path="/policies" element={<PoliciesPage />} />
           <Route path="*" element={<NotFoundPage />} />

@@ -5,12 +5,12 @@ import SectionWrapper from '@/components/shared/SectionWrapper';
 import EventCard from '@/components/shared/EventCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Image, CalendarHeart, SlidersHorizontal, Loader2, Sparkles, ListFilter, AlertTriangle, Briefcase, Clock, CheckCircle, HeartHandshake as Handshake, ExternalLink } from 'lucide-react';
+import { Image, CalendarHeart, SlidersHorizontal, Loader2, Sparkles, ListFilter, AlertTriangle, Briefcase, Clock, CheckCircle } from 'lucide-react'; // Removed Handshake, ExternalLink
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { staticInitiativesData } from '@/data/initiativesData';
-import { otherNgoInitiatives } from '@/data/otherNgoData'; // Import other NGO data
+// Removed import for otherNgoData as this section is moved to NgoNetworkPage
 
 const placeholderEventTemplate = {
   id: null, 
@@ -114,7 +114,7 @@ const InitiativesAndEventsPage = () => {
     }),
   };
 
-  const InitiativeCard = ({ initiative, index, isOtherNgo = false }) => (
+  const InitiativeCard = ({ initiative, index }) => ( // Removed isOtherNgo prop
      <motion.custom
       key={initiative.id}
       custom={index}
@@ -127,7 +127,6 @@ const InitiativesAndEventsPage = () => {
         <CardHeader className="p-5 md:p-6 items-center text-center">
           {initiative.icon ? React.cloneElement(initiative.icon, {className: "h-10 w-10 text-primary mb-2"}) : <Sparkles className="h-10 w-10 text-primary mb-2" />}
           <CardTitle className="text-xl md:text-2xl text-primary font-heading mt-2">{initiative.name || initiative.title}</CardTitle>
-          {isOtherNgo && initiative.focus && <CardDescription className="text-sm text-secondary font-medium">{initiative.focus}</CardDescription>}
         </CardHeader>
         <CardContent className="p-5 md:p-6 flex-grow">
           <CardDescription className="text-sm text-foreground/80 mb-3 leading-relaxed">{initiative.subtitle || initiative.description.substring(0, 120) + '...'}</CardDescription>
@@ -144,17 +143,9 @@ const InitiativesAndEventsPage = () => {
           )}
         </CardContent>
         <CardFooter className="p-5 md:p-6 border-t border-border/40">
-          {isOtherNgo ? (
-            <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-lg" asChild>
-              <a href={initiative.volunteerLink || initiative.websiteLink || '#'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
-                Volunteer/Visit <ExternalLink className="h-4 w-4 ml-2"/>
-              </a>
-            </Button>
-          ) : (
-            <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-lg" asChild>
-              <Link to={`/initiatives-events/${initiative.id}`}>Learn More</Link>
-            </Button>
-          )}
+          <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-lg" asChild>
+            <Link to={`/initiatives-events/${initiative.id}`}>Learn More</Link>
+          </Button>
         </CardFooter>
       </Card>
     </motion.custom>
@@ -219,27 +210,7 @@ const InitiativesAndEventsPage = () => {
       {renderEventSection("Future Work", displayFutureEvents, <CalendarHeart className="h-8 w-8 text-primary" />)}
       {renderEventSection("Past Work", displayPastEvents, <CheckCircle className="h-8 w-8 text-primary" />)}
 
-      <SectionWrapper id="other-ngo-initiatives-section" className="bg-accent/5 rounded-xl py-16 md:py-20">
-        <div className="flex items-center mb-8 md:mb-12">
-          <Handshake className="h-8 w-8 text-primary" />
-          <h2 className="text-2xl md:text-3xl font-semibold text-primary ml-3">Other NGO Initiatives We Support</h2>
-        </div>
-        <p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
-          Let's Donate also collaborates with and supports other impactful NGOs. Explore their work and find more ways to contribute to the community.
-        </p>
-        {otherNgoInitiatives.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {otherNgoInitiatives.map((item, index) => 
-              <InitiativeCard initiative={item} index={index} key={item.id || `other-ngo-${index}`} isOtherNgo={true} />
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <AlertTriangle className="h-16 w-16 text-primary/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">Information about other supported NGOs is coming soon!</p>
-          </div>
-        )}
-      </SectionWrapper>
+      {/* Removed Other NGO Initiatives Section - it's now part of NgoNetworkPage */}
 
       <SectionWrapper id="get-involved-cta" className="text-center mt-16 md:mt-24 bg-gradient-to-br from-primary/5 via-background to-secondary/5 rounded-xl py-12 md:py-16">
         <CalendarHeart className="h-12 w-12 text-primary mx-auto mb-6" />

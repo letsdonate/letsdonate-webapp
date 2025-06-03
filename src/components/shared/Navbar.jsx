@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Users, Info, Image, MessageCircle, ChevronDown, Clock, Gift, DollarSign, Home as HomeIcon, Sparkles } from 'lucide-react';
+import { Menu, X, Users, Info, Image, MessageCircle, ChevronDown, Clock, Gift, DollarSign, Home as HomeIcon, Sparkles, Cake, HeartHandshake as Handshake } from 'lucide-react'; // Added Cake, Handshake
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 
 const mainNavLinksBeforeDonate = [
   { to: '/', label: 'Home', icon: <HomeIcon className="h-5 w-5 mr-2 md:hidden" /> },
 ];
 
-// Updated mainNavLinksAfterDonate to reflect merged page
 const mainNavLinksAfterDonate = [
   { to: '/about-us', label: 'About Us', icon: <Info className="h-5 w-5 mr-2 md:hidden" /> },
-  { to: '/initiatives-events', label: 'Initiatives & Events', icon: <Sparkles className="h-5 w-5 mr-2 md:hidden" /> }, // Updated Link
+  { to: '/initiatives-events', label: 'Initiatives & Events', icon: <Sparkles className="h-5 w-5 mr-2 md:hidden" /> },
+  { to: '/ngo-network', label: 'NGO Network', icon: <Handshake className="h-5 w-5 mr-2 md:hidden" /> }, // New NGO Network Link
   { to: '/social-change-circle', label: 'Social Circle', icon: <Users className="h-5 w-5 mr-2 md:hidden" /> },
 ];
 
@@ -25,6 +26,7 @@ const donateSubLinks = [
   { to: '/donate/time', label: 'Donate Time', icon: <Clock className="h-5 w-5 mr-2" /> },
   { to: '/donate/material', label: 'Donate Material', icon: <Gift className="h-5 w-5 mr-2" /> },
   { to: '/donate/money', label: 'Donate Money', icon: <DollarSign className="h-5 w-5 mr-2" /> },
+  { to: '/celebrate-birthday', label: 'Celebrate With Us', icon: <Cake className="h-5 w-5 mr-2" /> }, // New Celebrate Link
 ];
 
 const Navbar = () => {
@@ -65,17 +67,20 @@ const Navbar = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className={`${inactiveLinkClass} text-sm font-medium flex items-center py-1`}>
-                Donate <ChevronDown className="h-4 w-4 ml-1" />
+                Get Involved <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 shadow-soft">
-              {donateSubLinks.map((subLink) => (
-                <DropdownMenuItem key={subLink.to} asChild>
-                  <Link to={subLink.to} className="flex items-center w-full">
-                    {subLink.icon}
-                    {subLink.label}
-                  </Link>
-                </DropdownMenuItem>
+              {donateSubLinks.map((subLink, index) => (
+                <React.Fragment key={subLink.to}>
+                  <DropdownMenuItem asChild>
+                    <Link to={subLink.to} className="flex items-center w-full">
+                      {subLink.icon}
+                      {subLink.label}
+                    </Link>
+                  </DropdownMenuItem>
+                  {index === 2 && <DropdownMenuSeparator />} 
+                </React.Fragment>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -131,7 +136,7 @@ const Navbar = () => {
                 </NavLink>
               ))}
               <div className="py-2 px-3">
-                <p className="text-sm font-semibold text-primary mb-1">Donate</p>
+                <p className="text-sm font-semibold text-primary mb-1">Get Involved</p>
                 {donateSubLinks.map((subLink) => (
                   <NavLink
                     key={subLink.to}
