@@ -1,97 +1,161 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
-import EventCard from '@/components/shared/EventCard';
+import EventCard from '@/components/shared/EventCard'; // Assuming this is a generic event card
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Image, CalendarHeart, SlidersHorizontal } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'; // Added CardFooter
+import { Image, CalendarHeart, SlidersHorizontal, Loader2, Zap, Brain, Users, Sun, MessageSquare, BookOpen, Heart } from 'lucide-react'; // Added Heart
 import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabaseClient';
+import { useToast } from '@/components/ui/use-toast';
 
-const placeholderEvents = [
+const placeholderEventTemplate = {
+  id: null, 
+  title: 'Exciting Initiative Highlight Coming Soon!',
+  description: 'Details about this impactful initiative will be shared shortly. Stay tuned for updates.',
+  date: 'Ongoing / Varies',
+  location: 'Multiple Locations',
+  images: [],
+  youtube_link: null,
+  category: 'Initiative'
+};
+
+const generatePlaceholders = (count) => {
+  return Array.from({ length: count }, (_, i) => ({
+    ...placeholderEventTemplate,
+    id: `placeholder-initiative-${i}`,
+    title: `Initiative Placeholder ${i + 1}`,
+  }));
+};
+
+const MINIMUM_ITEMS_DISPLAY = 6;
+
+const initiativesData = [
   {
-    id: 1,
-    title: 'Annual Children\'s Art Fair',
-    description: 'A vibrant showcase of creativity where young artists display their masterpieces. Includes workshops and fun activities.',
-    date: 'August 10, 2025',
-    location: 'Community Park Central',
-    photos: [
-      'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
-      'https://images.unsplash.com/photo-1505241478339-95c962445331?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
-      'https://images.unsplash.com/photo-1600814069046-aa6dbf3aad49?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
+    id: 'lets-donate-core',
+    title: "Let's Donate (Core Initiative)",
+    icon: <Heart className="h-10 w-10 text-primary" />,
+    description: "Our regular, year-round engagements in underserved communities focusing on academic subjects, creative learning, and life skills. Donations aren't just monetary; give time, talent, books, or even a story.",
+    details: [
+      "Academic subjects: English, Mathematics, Science, Vedic Maths, Verbal Reasoning",
+      "Creative learning: Storytelling, Motivation, Value education, Emotional awareness",
+      "Life Skills: Communication, Financial Literacy, Curiosity-based exploration",
+      "Venues: Government/community schools, children’s homes, slum learning centers"
     ],
-    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 
-    category: 'Art & Drama'
+    imagePlaceholder: "Diverse group of children engaged in a learning activity"
   },
   {
-    id: 2,
-    title: 'Math Whiz Challenge 2025',
-    description: 'An exciting competition for students to test their mathematical skills and problem-solving abilities.',
-    date: 'September 5, 2025',
-    location: 'City Convention Hall',
-    photos: [
-      'https://images.unsplash.com/photo-1596495577881-e603dde67643?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
-      'https://images.unsplash.com/photo-1509062522106-8aae40290970?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
+    id: 'lets-prepare',
+    title: "Let's Prepare",
+    icon: <BookOpen className="h-10 w-10 text-primary" />,
+    description: "Our exam and academic readiness program launched in July 2024, targeting 8th-grade students in government schools for scholarship exams.",
+    details: [
+      "Target Group: 8th-grade students in government schools",
+      "Activities: Concept-building, regular practice tests, doubt-clearing sessions",
+      "Special Support: Helping students fill out scholarship and exam forms",
+      "Impact: Boost in confidence, clarity, and ambition beyond marks"
     ],
-    videoUrl: null,
-    category: 'Maths'
+    imagePlaceholder: "Students diligently preparing for an exam"
   },
   {
-    id: 3,
-    title: 'Storytellers\' Conclave',
-    description: 'A magical event where professional storytellers enchant audiences of all ages with captivating tales.',
-    date: 'October 12, 2025',
-    location: 'Grand Library Auditorium',
-    photos: ['https://images.unsplash.com/photo-1519791883288-dc8bd696e667?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600'],
-    videoUrl: 'https://www.youtube.com/watch?v=VIDEO_ID_STORY',
-    category: 'Storytelling'
-  },
-  {
-    id: 4,
-    title: 'Young Scientists Expo',
-    description: 'Innovative science projects by budding scientists. Interactive exhibits and live demonstrations.',
-    date: 'November 15-16, 2025',
-    location: 'Science & Technology Museum',
-    photos: [
-      'https://images.unsplash.com/photo-1574610758891-5b809b6e6e2e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
-      'https://images.unsplash.com/photo-1606092195730-0d126839afd8?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
-      'https://images.unsplash.com/photo-1554475020-62isf7b768da?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
+    id: 'lets-elevate',
+    title: "Let's Elevate",
+    icon: <Zap className="h-10 w-10 text-primary" />,
+    description: "A mentorship and second-chance education initiative, especially for school dropouts and teenage girls, empowering them to dream again.",
+    details: [
+      "Focus: Empowering those who left school but still have the will to grow",
+      "Skills: Personality development, confidence building, financial literacy",
+      "Side-income skills: Mehndi art, home-based business ideas",
+      "Motivation through success stories"
     ],
-    videoUrl: null,
-    category: 'Science'
+    imagePlaceholder: "Young individuals participating in a skill development workshop"
   },
   {
-    id: 5,
-    title: 'Community Sports Day',
-    description: 'A day of fun-filled sports activities for families and children, promoting health and teamwork.',
-    date: 'December 1, 2025',
-    location: 'City Sports Ground',
-    photos: ['https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600'],
-    videoUrl: 'https://www.youtube.com/watch?v=VIDEO_ID_SPORTS',
-    category: 'Sports'
-  },
-  {
-    id: 6,
-    title: 'Winter Cheer Distribution Drive',
-    description: 'Volunteers come together to distribute warm clothes, blankets, and essentials to those in need.',
-    date: 'December 20, 2025',
-    location: 'Multiple City Shelters',
-    photos: [
-        'https://images.unsplash.com/photo-1608206756236-de7a408e1963?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600',
-        'https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600'
+    id: 'lets-summer',
+    title: "Let's Summer",
+    icon: <Sun className="h-10 w-10 text-primary" />,
+    description: "A 2-month summer camp (April–May) in orphanages, government schools, and special education schools, making learning fun.",
+    details: [
+      "Format: Daily or alternate-day sessions by guest teachers, artists, professionals",
+      "Activities: Dance, Art, Theatre, Baking, Games, Mindfulness, Science, Maths, GK",
+      "Outcome: Children discover joy, develop curiosity, and express themselves"
     ],
-    videoUrl: null,
-    category: 'Community Service'
+    imagePlaceholder: "Children enjoying a summer camp activity outdoors"
+  },
+  {
+    id: 'lets-donate-clarity',
+    title: "Let's Donate Clarity (Social Change Circle)",
+    icon: <MessageSquare className="h-10 w-10 text-primary" />,
+    description: "A collaborative initiative with ClickForClarity for brain development, expanded to monthly meetups for young adults to tackle societal issues.",
+    details: [
+      "Expanded Format: Monthly meetups for young adults and volunteers",
+      "Process: Each group chooses a real societal issue (unemployment, addiction, etc.)",
+      "Action: Participants brainstorm and take the first small step toward resolution",
+      "Goal: Community-led change through empathy, conversation, and action"
+    ],
+    imagePlaceholder: "Group of young adults in a discussion circle"
   }
 ];
 
-const categories = ['All', ...new Set(placeholderEvents.map(event => event.category))];
 
 const EventsGalleryPage = () => {
+  const [eventsAndInitiatives, setEventsAndInitiatives] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const { toast } = useToast();
 
-  const filteredEvents = selectedCategory === 'All' 
-    ? placeholderEvents 
-    : placeholderEvents.filter(event => event.category === selectedCategory);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const { data: dbEvents, error: dbError } = await supabase
+      .from('events')
+      .select('*')
+      .order('date', { ascending: false });
+
+    let combinedData = [];
+
+    if (dbError) {
+      toast({ title: 'Error fetching database events', description: dbError.message, variant: 'destructive' });
+      combinedData = [...initiativesData.map(init => ({...init, type: 'initiative'})), ...generatePlaceholders(MINIMUM_ITEMS_DISPLAY - initiativesData.length > 0 ? MINIMUM_ITEMS_DISPLAY - initiativesData.length : 0)];
+    } else {
+      const formattedDbEvents = dbEvents.map(event => ({...event, type: 'event'}));
+      combinedData = [...formattedDbEvents, ...initiativesData.map(init => ({...init, type: 'initiative'}))];
+      
+      if (combinedData.length < MINIMUM_ITEMS_DISPLAY) {
+        const placeholdersNeeded = MINIMUM_ITEMS_DISPLAY - combinedData.length;
+        combinedData.push(...generatePlaceholders(placeholdersNeeded));
+      }
+    }
+    // Sort: initiatives first, then events by date
+    combinedData.sort((a, b) => {
+        if (a.type === 'initiative' && b.type !== 'initiative') return -1;
+        if (a.type !== 'initiative' && b.type === 'initiative') return 1;
+        if (a.type === 'event' && b.type === 'event') {
+            if (!a.date && b.date) return 1; // Placeholders (no date) after dated events
+            if (a.date && !b.date) return -1;
+            if (!a.date && !b.date) return 0;
+            return new Date(b.date) - new Date(a.date); // newest events first
+        }
+        return 0; // keep initiatives order or if types are same but not event
+    });
+
+    setEventsAndInitiatives(combinedData);
+    setLoading(false);
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+  
+  const categories = ['All', 'Events', 'Initiatives', ...new Set(eventsAndInitiatives.filter(item => item.type === 'event' && item.category).map(event => event.category))];
+
+  const filteredItems = selectedCategory === 'All' 
+    ? eventsAndInitiatives
+    : eventsAndInitiatives.filter(item => {
+        if (selectedCategory === 'Events') return item.type === 'event';
+        if (selectedCategory === 'Initiatives') return item.type === 'initiative';
+        return item.category === selectedCategory && item.type === 'event';
+      });
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -103,15 +167,24 @@ const EventsGalleryPage = () => {
     }),
   };
 
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-10 text-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+        <p className="text-muted-foreground">Loading moments that matter...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4">
-      <PageHeader title="Events & Gallery" subtitle="Relive the moments of joy, learning, and community spirit from our diverse events.">
+      <PageHeader title="Moments That Matter" subtitle="Our impact speaks visually. Explore our events and ongoing initiatives.">
         <Image className="h-16 w-16 text-primary mx-auto mt-4" />
       </PageHeader>
 
-      <SectionWrapper id="event-filters" className="!py-0 mb-10 md:mb-12">
+      <SectionWrapper id="content-filters" className="!py-0 mb-10 md:mb-12">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl font-semibold text-primary mb-4 sm:mb-0">Browse Our Events</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold text-primary mb-4 sm:mb-0">Browse Our Work</h2>
           <div className="relative">
             <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <select 
@@ -120,46 +193,71 @@ const EventsGalleryPage = () => {
               className="pl-10 pr-8 py-2.5 rounded-lg border border-input bg-background text-sm focus:ring-primary focus:border-primary shadow-sm"
             >
               {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+                <option key={category} value={category}>{category || 'Uncategorized'}</option>
               ))}
             </select>
           </div>
         </div>
       </SectionWrapper>
       
-      {filteredEvents.length > 0 ? (
+      {filteredItems.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {filteredEvents.map((event, index) => (
+          {filteredItems.map((item, index) => (
             <motion.custom
-              key={event.id}
+              key={item.id || `item-${index}`}
               custom={index}
               initial="hidden"
               animate="visible"
               variants={cardVariants}
             >
-              <EventCard event={event} />
+              {item.type === 'initiative' ? (
+                <Card className="rounded-xl shadow-soft hover:shadow-soft-hover transition-shadow duration-300 overflow-hidden flex flex-col h-full bg-card">
+                  <CardHeader className="p-5 md:p-6 items-center text-center">
+                    {item.icon}
+                    <CardTitle className="text-2xl text-primary font-heading mt-3">{item.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-5 md:p-6 flex-grow">
+                    <CardDescription className="text-sm text-foreground/80 mb-4 leading-relaxed">{item.description}</CardDescription>
+                    <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
+                        {item.details?.map((detail, idx) => <li key={idx}>{detail}</li>)}
+                    </ul>
+                  </CardContent>
+                  <CardFooter className="p-5 md:p-6 border-t border-border/40">
+                    <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary rounded-lg" asChild>
+                        <Link to={`/initiatives/${item.id}`}>Learn More</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ) : (
+                <EventCard event={item} /> // Regular event card for 'event' type
+              )}
             </motion.custom>
           ))}
         </div>
       ) : (
         <div className="text-center py-12">
           <CalendarHeart className="h-20 w-20 text-primary/50 mx-auto mb-6" />
-          <h3 className="text-2xl font-semibold text-primary mb-2">No Events Found</h3>
+          <h3 className="text-2xl font-semibold text-primary mb-2">No Content Found</h3>
           <p className="text-muted-foreground">
-            It seems there are no events matching "{selectedCategory}". Try a different category!
+            It seems there's no content matching "{selectedCategory}". Try a different filter or check back soon!
           </p>
         </div>
       )}
 
-      <SectionWrapper id="upcoming-events-cta" className="text-center mt-16 md:mt-24 bg-primary/5 rounded-xl py-12 md:py-16">
+      <SectionWrapper id="cta-section" className="text-center mt-16 md:mt-24 bg-primary/5 rounded-xl py-12 md:py-16">
         <CalendarHeart className="h-12 w-12 text-secondary mx-auto mb-6" />
-        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Stay Tuned for More!</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Get Involved!</h2>
         <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-          We're always planning new and exciting events. Follow us on social media or subscribe to our newsletter to get the latest updates.
+          Inspired by our work? Join us in making a difference. Volunteer your time, donate, or spread the word.
         </p>
-        <Button size="lg" asChild className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-8 py-3 text-base">
-          <a href="#footer-newsletter">Subscribe Now</a>
-        </Button>
+        <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" asChild className="bg-primary hover:bg-primary-soft text-primary-foreground rounded-lg px-8 py-3 text-base">
+                <Link to="/donate/time">Volunteer With Us</Link>
+            </Button>
+            <Button size="lg" variant="secondary" asChild className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-8 py-3 text-base">
+                <Link to="/donate/money">Support Financially</Link>
+            </Button>
+        </div>
       </SectionWrapper>
     </div>
   );
