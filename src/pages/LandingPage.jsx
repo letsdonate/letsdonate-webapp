@@ -21,7 +21,7 @@ const heroSlidesData = [
     subtitle: "Join Let's Donate and make a tangible difference in the lives of those who need it most.",
     buttonText: "Join as a Volunteer",
     buttonLink: "/donate/time",
-    imageSrc: "https://images.unsplash.com/photo-1642420290986-c7a55bab708f" 
+    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/vrhwd4vsx1ieykwokmrcu/Carousel_1.jpg?rlkey=6u6rv3u7jf9snsdou8j0ehc6a" 
   },
   {
     titlePart1: "Make your special day",
@@ -365,9 +365,9 @@ const LandingPage = () => {
 
       <SectionWrapper id="about-intro">
         <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let’s Donate</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let's Donate</h2>
           <p className="text-lg md:text-xl text-muted-foreground mb-8">
-            Let’s Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
+            Let's Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
           </p>
           <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 hover:text-primary rounded-lg">
             <Link to="/about-us">Discover Our Story</Link>

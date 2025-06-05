@@ -68,10 +68,9 @@ const InitiativeDetailPage = () => {
                     className="absolute inset-0 w-full h-full"
                   >
                     <img 
-                      src={photos[currentImageIndex]}
                       alt={`${initiative.title} - photo ${currentImageIndex + 1}`}
                       className="w-full h-full object-cover"
-                     src="https://images.unsplash.com/photo-1644566858654-1534e217d046" />
+                      src={photos[currentImageIndex]} />
                   </motion.div>
                 </AnimatePresence>
                 {photos.length > 1 && (
@@ -101,12 +100,13 @@ const InitiativeDetailPage = () => {
                 <iframe
                   width="100%"
                   height="100%"
-                  src={videoUrl.includes("embed") ? videoUrl : videoUrl.replace("watch?v=", "embed/")}
+                  src={videoUrl}
                   title={`${initiative.title} video highlights`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="border-0"
-                ></iframe>
+                  referrerPolicy="strict-origin"
+                />
               </div>
             )}
              {!videoUrl && photos && photos.length > 0 && ( // Show video placeholder only if there are photos but no video

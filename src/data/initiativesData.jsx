@@ -25,14 +25,14 @@ export const staticInitiativesData = [
         title: "Venues We Serve",
         content: [
           "Government and community schools.",
-          "Children’s homes and orphanages.",
+          "Children's homes and orphanages.",
           "Slum learning centers and informal education hubs."
         ],
         icon: <Users className="h-6 w-6 text-primary" />
       },
       {
         title: "Unique Feature",
-        content: ["Donations aren't just monetary. You can give your time, talent, old books, toys, skills, or even a story — and change a child’s day."],
+        content: ["Donations aren't just monetary. You can give your time, talent, old books, toys, skills, or even a story — and change a child's day."],
         icon: <Gift className="h-6 w-6 text-primary" />
       }
     ],
@@ -116,10 +116,10 @@ export const staticInitiativesData = [
     title: "Let's Summer",
     icon: <Sun className="h-12 w-12 text-primary" />,
     subtitle: "Making summer holidays joyful and enriching.",
-    description: "Our vibrant 2-month summer camp, held during April-May, transforms holidays into a period of joyful learning and creative exploration for children in orphanages, government schools, and special education centers.",
+    description: "Our Annual summer camp designed for children who have limited access to structured breaks. Held across shelter homes, government schools, and special institutions, this initiative brings joy, learning, and self-expression through creative and confidence-building workshops led by passionate volunteers.",
     themeColor: 'bg-orange-500/10',
-    photos: ["/images/initiatives/summer/summer_1.jpg"],
-    youtubeLink: null,
+    photos: ["https://dl.dropboxusercontent.com/scl/fi/1bdoxdf3btzwiiu7hr8pi/LETS_SUMMER_MAIN.jpg?rlkey=61ukkag7liy9qiot36qz7fp18&raw=1"],
+    youtubeLink: "https://www.youtube-nocookie.com/embed/mro5NEfTWNw",
     sections: [
       { 
         title: "Camp Format",

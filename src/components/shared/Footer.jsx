@@ -58,7 +58,7 @@ const Footer = () => {
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <img src="/logo-icon.svg" alt="Let's Donate Logo Icon" className="h-8 w-8" />
               <span className="text-xl font-bold">
-                <span className="text-foreground/70 font-medium">Let’s</span> <span className="text-primary font-bold">Donate</span>
+                <span className="text-foreground/70 font-medium">Let's</span> <span className="text-primary font-bold">Donate</span>
               </span>
             </Link>
             <p className="text-sm mb-2 text-muted-foreground">"Be the reason someone believes in kindness again."</p>
@@ -79,9 +79,9 @@ const Footer = () => {
           <div>
             <p className="font-semibold text-foreground mb-4 text-lg">Contact Us</p>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center text-muted-foreground"><Mail className="h-5 w-5 mr-3 text-primary" /> info@letsdonate.org</li>
-              <li className="flex items-center text-muted-foreground"><Phone className="h-5 w-5 mr-3 text-primary" /> +91 987 654 3210</li>
-              <li className="flex items-center text-muted-foreground"><MapPin className="h-5 w-5 mr-3 text-primary" /> Bangalore, India</li>
+              <li className="flex items-center text-muted-foreground"><Mail className="h-5 w-5 mr-3 text-primary" /> letsdonateofficial@gmail.com</li>
+              <li className="flex items-center text-muted-foreground"><Phone className="h-5 w-5 mr-3 text-primary" /> +91 8109710356</li>
+              <li className="flex items-center text-muted-foreground"><MapPin className="h-5 w-5 mr-3 text-primary" /> Raipur, Chhattisgarh</li>
             </ul>
             <div className="flex space-x-4 mt-6">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors duration-300"><Instagram size={22}/></a>
@@ -113,8 +113,8 @@ const Footer = () => {
           </div>
         </div>
         <div className="border-t border-border/40 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Let's Donate. All Rights Reserved. Crafted with <span className="text-primary">❤️</span> by Hostinger Horizons.</p>
-          <p className="mt-1">"All photos and videos of Let's Donate events must be approved before being shared publicly."</p>
+          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Let's Donate. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground/80 mt-1">Making a difference through compassion and community action.</p>
         </div>
       </div>
     </footer>

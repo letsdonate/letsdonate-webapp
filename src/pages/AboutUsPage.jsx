@@ -2,27 +2,27 @@ import React from 'react';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, Target, TrendingUp, UserCircle, Heart, Sparkles, Brain, Users2, Zap, Sun, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const values = [
+  { title: 'Community-led Action', icon: <Users2 className="h-8 w-8 text-primary" />, description: 'Empowering local communities to drive and sustain positive change.' },
   { title: 'Empathy over Ego', icon: <Heart className="h-8 w-8 text-primary" />, description: 'We prioritize understanding and connection in all our actions.' },
   { title: 'Joy in Learning', icon: <Sparkles className="h-8 w-8 text-primary" />, description: 'Fostering curiosity and happiness through engaging educational experiences.' },
-  { title: 'Community-led Action', icon: <Users2 className="h-8 w-8 text-primary" />, description: 'Empowering local communities to drive and sustain positive change.' },
   { title: 'Simplicity with Substance', icon: <Zap className="h-8 w-8 text-primary" />, description: 'Focusing on impactful solutions that are accessible and meaningful.' },
 ];
 
 const milestones = [
-  { date: 'June 2023', event: 'Founded with 3 sessions; the focus was on giving back through sharing your skill.', icon: <Heart className="text-primary" /> },
-  { date: 'July 2023', event: 'Sessions expanded to underprivileged orphanages; volunteers steadily joined to share their talents.', icon: <Users className="text-primary" /> },
-  { date: 'April 2024', event: 'Launched major initiatives: Let’s Summer and Let’s Elevate. Began long-term engagements with schools.', icon: <TrendingUp className="text-primary" /> },
-  { date: 'July 2024', event: 'Launched Let’s Prepare with 80+ volunteers across 6 schools in Raipur.', icon: <Target className="text-primary" /> },
-  { date: '2025 - Present', event: 'Currently impacting over 2000+ children through 5000+ sessions, supported by 100+ dedicated volunteers.', icon: <Heart className="text-primary animate-pulse" /> },
+  { date: 'June 2023', event: 'Founded with a weekend summer camp; the focus was on giving back through sharing our skills.', icon: <Heart className="text-primary" /> },
+  { date: 'November 2023', event: "Launched Let's Donate Clarity—our first community partnership for weekly holistic brain development sessions.", icon: <Brain className="text-primary" /> },
+  { date: 'April 2024', event: "Launched major initiatives: Let's Summer and Let's Elevate. Started weekday sessions at girls' orphanages to create deeper impact.", icon: <TrendingUp className="text-primary" /> },
+  { date: 'July 2024', event: "Launched Let's Prepare with 80+ volunteers across 6 schools in Raipur. Began long-term engagements with government schools.", icon: <Target className="text-primary" /> },
+  { date: '2025 – Present', event: "Currently impacting over 2,000+ children through 5,000+ sessions, supported by 300+ dedicated volunteers.", icon: <Heart className="text-primary animate-pulse" /> },
 ];
 
 const teamMembers = [
-  { name: 'Aakansha Shukla', role: 'Coordination Lead', bio: 'Active across all school sessions, core in Let’s Prepare. Ensures smooth execution and volunteer engagement.', imagePlaceholder: 'Professional headshot of Aakansha Shukla', avatarFallback: 'AS' },
+  { name: 'Aakansha Shukla', role: 'Coordination Lead', bio: 'Active across all school sessions, core in Let&apos;s Prepare. Ensures smooth execution and volunteer engagement.', imagePlaceholder: 'Professional headshot of Aakansha Shukla', avatarFallback: 'AS' },
   { name: 'Shubham Verma', role: 'Creative Educator', bio: 'Led numerous maths and science sessions, bringing innovation and fun to learning.', imagePlaceholder: 'Professional headshot of Shubham Verma', avatarFallback: 'SV' },
   { name: 'Prasun', role: 'Operational Planner', bio: 'Manages session logistics, school outreach, and ensures resources are effectively utilized.', imagePlaceholder: 'Professional headshot of Prasun', avatarFallback: 'P' },
   { name: 'Pooja Shrivastava', role: 'Core Teaching Volunteer', bio: 'An impactful presence in government school sessions, dedicated to student growth.', imagePlaceholder: 'Professional headshot of Pooja Shrivastava', avatarFallback: 'PS' },
@@ -41,19 +41,26 @@ const AboutUsPage = () => {
 
   return (
     <div className="container mx-auto px-4">
-      <PageHeader title="About Let's Donate" subtitle="More than an NGO — a growing movement of empathy.">
+      <PageHeader title="About Let&apos;s Donate" subtitle="More than an NGO — a growing movement of empathy.">
         <Users className="h-16 w-16 text-primary mx-auto mt-4" />
       </PageHeader>
 
       <SectionWrapper id="who-we-are">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Who We Are</h2>
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-4">
-            Let’s Donate was born from a simple idea: giving connects us to our best selves. Started by a software engineer who experienced the joy of sharing during a personal high point, our foundation rests on the belief that every contribution—be it time, material, or money—nurtures lives and spreads kindness.
-          </p>
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-            From just three sessions with friends in 2021, we’ve expanded to touch thousands of children through impactful, joyful, and educational experiences across cities, schools, and communities.
-          </p>
+        <div className="space-y-6 max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6 text-center">Who We Are</h2>
+          <div className="bg-card/50 rounded-lg p-8 shadow-soft border-l-4 border-primary">
+            <p className="text-xl md:text-2xl text-primary/90 font-medium leading-relaxed mb-8">
+              Let&apos;s Donate is a community-driven movement making learning joyful and accessible for underprivileged and special children.
+            </p>
+            
+            <p className="text-lg md:text-xl text-primary/80 leading-relaxed mb-6">
+              Founded in 2023 by a software engineer who discovered the joy of giving while teaching at an orphanage, we began with a few weekend sessions—and have since grown into a network of volunteers creating hands-on, fun learning experiences across schools, orphanages, and shelters.
+            </p>
+            
+            <p className="text-lg md:text-xl text-primary/80 leading-relaxed italic border-t border-primary/20 pt-6">
+              From art and science to storytelling and life skills, our sessions are easy to lead and exciting for kids—proving that anyone can teach, and everyone can give.
+            </p>
+          </div>
         </div>
       </SectionWrapper>
 
@@ -61,13 +68,13 @@ const AboutUsPage = () => {
         <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
           <h3 className="text-2xl md:text-3xl font-semibold text-primary mb-4">Our Mission</h3>
           <p className="text-muted-foreground leading-relaxed">
-            To create a compassionate world by empowering people to give meaningfully—whether it’s time, resources, or knowledge—and enable equitable access to joy, learning, and opportunities.
+            To build a more compassionate world by making it easy for anyone to give—whether it&apos;s time, skills, or resources—while creating joyful, inclusive learning experiences that help under-resourced children dream big, grow with confidence, and thrive.
           </p>
         </motion.div>
         <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
           <h3 className="text-2xl md:text-3xl font-semibold text-primary mb-4">Our Vision</h3>
           <p className="text-muted-foreground leading-relaxed">
-            A world where kindness is a norm, not a rarity. A world where children grow up not just with basic resources, but with hope, joy, and encouragement.
+            A world where kindness is a norm, not a rarity. We envision a society where everyone feels empowered to help others—where giving is simple, and resources are used wisely to reach more lives. By enabling people to become changemakers in their own way, we strive to build a world filled with compassion, empathy, and collective growth.
           </p>
         </motion.div>
       </SectionWrapper>
@@ -95,7 +102,7 @@ const AboutUsPage = () => {
       </SectionWrapper>
 
       <SectionWrapper id="timeline" className="bg-primary/5 rounded-xl py-16 md:py-20">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Our Journey & Milestones (2021–Present)</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Our Journey & Milestones (2023–Present)</h2>
         <div className="relative max-w-3xl mx-auto">
           <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-primary/20 rounded-full transform -translate-x-1/2"></div>
           {milestones.map((milestone, index) => (
@@ -129,13 +136,17 @@ const AboutUsPage = () => {
             <CardTitle className="text-2xl md:text-3xl text-primary">Meet The Founder</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <Avatar className="w-32 h-32 mx-auto mb-6 border-4 border-secondary shadow-md">
-              <img  className="object-cover" alt="Founder Let's Donate" src="https://images.unsplash.com/photo-1652841190565-b96e0acbae17" />
-              <AvatarFallback className="text-4xl bg-secondary text-secondary-foreground">LD</AvatarFallback>
+            <Avatar className="w-32 h-32 mx-auto mb-6 border-4 border-primary shadow-md">
+              <AvatarImage 
+                src="https://dl.dropboxusercontent.com/scl/fi/vwjyanc56mt388rgi26gf/Shubham.jpg?rlkey=jk9g3voxi5mo22u5cvu6zj5kz" 
+                alt="Shubham Choudhary - Founder of Let's Donate"
+              />
+              <AvatarFallback>SC</AvatarFallback>
             </Avatar>
-            <blockquote className="text-lg italic text-muted-foreground mb-4">"Every time I walk into a session, I walk into a better version of myself."</blockquote>
+            <h3 className="text-xl font-semibold text-primary mb-6">Shubham Choudhary</h3>
+            <blockquote className="text-lg italic text-muted-foreground mb-4">"If doing good feels right, it should also be easy."</blockquote>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Started as a personal practice of kindness during joyful moments, the founder’s intention was to share that feeling with others. A software engineer by profession, their empathy and leadership sparked a community-driven movement where technology, humanity, and joy meet.
+              Started with a simple idea—to make acts of kindness more accessible for everyone—the founder&apos;s journey began with a desire to use his skills to help society. A software engineer by profession, his empathy and vision sparked a community-driven movement where generosity is made easy, and technology, humanity, and joy come together to create lasting change.
             </p>
           </CardContent>
         </Card>
