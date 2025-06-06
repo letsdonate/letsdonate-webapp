@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
@@ -10,8 +11,10 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label'; // Added Label import
-import { staticNgoData } from '@/data/staticNgoData'; // Fallback data
+import { Label } from '@/components/ui/label';
+import { staticNgoData } from '@/data/staticNgoData';
+
+const DEFAULT_NGO_LOGO = "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?auto=format&fit=crop&w=300&q=60";
 
 const NgoNetworkPage = () => {
   const [ngos, setNgos] = useState([]);
@@ -29,9 +32,10 @@ const NgoNetworkPage = () => {
 
     if (error) {
       toast({ title: 'Error Fetching NGOs', description: error.message, variant: 'destructive' });
-      setNgos(staticNgoData); // Use static data as fallback
+      setNgos(staticNgoData.map(ngo => ({...ngo, logo_url: ngo.logo_url || DEFAULT_NGO_LOGO })));
     } else {
-      setNgos(data.length > 0 ? data : staticNgoData); // Use static if DB is empty
+      const processedData = data.map(ngo => ({...ngo, logo_url: ngo.logo_url || DEFAULT_NGO_LOGO }));
+      setNgos(processedData.length > 0 ? processedData : staticNgoData.map(ngo => ({...ngo, logo_url: ngo.logo_url || DEFAULT_NGO_LOGO })));
     }
     setLoading(false);
   }, [toast]);
@@ -74,6 +78,19 @@ const NgoNetworkPage = () => {
       >
         <Handshake className="h-16 w-16 text-primary mx-auto mt-4" />
       </PageHeader>
+
+      <SectionWrapper id="ngo-intro" className="!py-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-2xl md:text-3xl font-semibold text-primary mb-4">Join Hands for Greater Impact</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Our NGO Network brings together dedicated organizations committed to creating positive change. By collaborating and supporting each other, we can amplify our efforts and build a stronger, more compassionate community. Explore these trustworthy NGOs and find meaningful ways to contribute to their vital work. Your involvement, whether through volunteering or support, helps build a brighter future for all.
+          </p>
+        </motion.div>
+      </SectionWrapper>
 
       <SectionWrapper id="ngo-filters" className="!py-8">
         <div className="grid md:grid-cols-2 gap-6 mb-8 items-end">
@@ -149,9 +166,10 @@ const NgoNetworkPage = () => {
                 <Card className="rounded-xl shadow-soft hover:shadow-soft-hover transition-shadow duration-300 overflow-hidden flex flex-col h-full bg-card">
                   <CardHeader className="p-5 md:p-6 items-center text-center">
                     <img 
-                      src={ngo.logo_url || '/images/ngos/default-ngo-logo.png'} 
+                      src={ngo.logo_url} 
                       alt={`${ngo.name} logo`} 
-                      className="h-20 w-20 object-contain rounded-full mx-auto mb-4 border-2 border-primary/20 p-1"
+                      className="h-20 w-20 object-cover rounded-full mx-auto mb-4 border-2 border-primary/20 p-0.5 bg-muted"
+                      onError={(e) => { e.target.src = DEFAULT_NGO_LOGO; }}
                     />
                     <CardTitle className="text-xl md:text-2xl text-primary font-heading">{ngo.name}</CardTitle>
                   </CardHeader>

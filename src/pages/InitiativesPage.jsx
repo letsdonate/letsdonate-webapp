@@ -116,7 +116,7 @@ const initiativesData = [
     title: "Let's Summer",
     icon: <Sun className="h-12 w-12 text-primary" />,
     subtitle: "Making summer holidays joyful and enriching.",
-    description: "Our annual summer camp designed for children who have limited access to structured breaks. Held across shelter homes, government schools, and special institutions, this initiative brings joy, learning, and self-expression through creative and confidence-building workshops led by passionate volunteers.",
+    description: "Our vibrant 2-month summer camp, held during April-May, transforms holidays into a period of joyful learning and creative exploration for children in orphanages, government schools, and special education centers.",
     themeColor: 'bg-orange-500/10',
     sections: [
       { 

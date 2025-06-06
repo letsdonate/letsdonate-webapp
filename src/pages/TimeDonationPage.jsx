@@ -1,86 +1,102 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
-import EventCard from '@/components/shared/EventCard';
+import EventCard from '@/components/shared/EventCard'; 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Clock, CalendarDays, Users, Sparkles, Loader2, AlertTriangle, HeartHandshake } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
-import { VolunteerFormSection } from '@/pages/LandingPage'; // Import the shared form
+import VolunteerFormSection from '@/components/landing/VolunteerFormSection';
+import { staticInitiativesData } from '@/data/initiativesData';
 
-const placeholderEventTemplate = {
-  id: null, 
-  title: 'Upcoming Volunteer Opportunity!',
-  description: 'Details about this exciting volunteer event will be shared soon. Get ready to make a difference!',
-  date: 'To Be Announced',
-  location: 'To Be Confirmed',
-  photos: ['/images/events/placeholder/event_placeholder_1.jpg'],
-  youtube_link: null,
-  category: 'Volunteering',
-  type: 'event'
-};
-
-const generatePlaceholders = (count, existingIds) => {
-  const placeholders = [];
-  for (let i = 0; i < count; i++) {
-    let placeholderId = `placeholder-volunteer-event-${i}`;
-    let k = 0;
-    while (existingIds.has(placeholderId)) {
-      k++;
-      placeholderId = `placeholder-volunteer-event-${i}-${k}`;
-    }
-    placeholders.push({
-      ...placeholderEventTemplate,
-      id: placeholderId,
-      title: `Volunteer Event Placeholder ${i + 1}`,
-      photos: [`/images/events/placeholder/event_placeholder_${(i%3)+1}.jpg`],
-    });
-    existingIds.add(placeholderId);
-  }
-  return placeholders;
-};
-
-const MINIMUM_EVENTS_DISPLAY = 3;
+const DEFAULT_EVENT_IMAGE = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80";
+const DEFAULT_EVENT_VIDEO = "https://www.youtube.com/embed/mro5NEfTWNw";
 
 const TimeDonationPage = () => {
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [opportunities, setOpportunities] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const location = useLocation(); 
 
-  const fetchUpcomingEvents = useCallback(async () => {
-    setLoadingEvents(true);
-    const today = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('events')
-      .select('*')
-      .or(`date.gte.${today},date.is.null`) // Fetch events from today onwards or with no date (TBD)
-      .order('date', { ascending: true, nullsFirst: false }) // TBD events might appear after dated ones
-      .limit(MINIMUM_EVENTS_DISPLAY * 2); // Fetch a bit more to filter if needed
+  const fetchOpportunities = useCallback(async () => {
+    setLoading(true);
+    try {
+      const today = new Date().toISOString();
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('events')
+        .select('*')
+        .or(`date.gte.${today},date.is.null`) 
+        .order('date', { ascending: true, nullsFirst: false });
 
-    if (error) {
-      toast({ title: 'Error Fetching Upcoming Events', description: error.message, variant: 'destructive' });
-      setUpcomingEvents([]);
-    } else {
-      setUpcomingEvents(data.map(event => ({ ...event, type: 'event' })));
+      if (eventsError) {
+        throw eventsError;
+      }
+      
+      const fetchedEvents = eventsData.map(event => ({
+        ...event,
+        type: 'event',
+        photos: event.images && event.images.length > 0 ? event.images : [DEFAULT_EVENT_IMAGE],
+        youtube_link: event.youtube_link || DEFAULT_EVENT_VIDEO,
+        status: event.status || 'Future' 
+      }));
+
+      const activeInitiatives = staticInitiativesData
+        .filter(init => init.status === 'Ongoing' || init.status === 'Future')
+        .map(init => ({
+          id: init.id,
+          title: init.title,
+          description: init.shortDescription,
+          date: null, 
+          location: 'Raipur, Chhattisgarh (Multiple Locations)', 
+          category: init.category,
+          photos: (init.photos && init.photos.length > 0) ? init.photos : [DEFAULT_EVENT_IMAGE],
+          youtube_link: init.youtubeLink || DEFAULT_EVENT_VIDEO,
+          type: 'initiative',
+          status: init.status,
+          detailLink: `/initiatives-events/${init.id}`
+        }));
+
+      let combinedOpportunities = [...fetchedEvents, ...activeInitiatives];
+      
+      combinedOpportunities.sort((a, b) => {
+        const statusOrder = { 'Ongoing': 1, 'Future': 2 };
+        const statusA = statusOrder[a.status] || 3;
+        const statusB = statusOrder[b.status] || 3;
+        if (statusA !== statusB) return statusA - statusB;
+        if (a.date && b.date) return new Date(a.date) - new Date(b.date);
+        if (a.date) return -1; 
+        if (b.date) return 1;
+        return a.title.localeCompare(b.title);
+      });
+      
+      setOpportunities(combinedOpportunities);
+
+    } catch (error) {
+      toast({ title: 'Error Fetching Opportunities', description: error.message, variant: 'destructive' });
+      setOpportunities([]);
+    } finally {
+      setLoading(false);
     }
-    setLoadingEvents(false);
   }, [toast]);
 
   useEffect(() => {
-    fetchUpcomingEvents();
-  }, [fetchUpcomingEvents]);
+    fetchOpportunities();
+  }, [fetchOpportunities]);
 
-  let eventsToDisplay = [...upcomingEvents];
-  const existingEventIds = new Set(upcomingEvents.map(e => e.id));
-  
-  if (eventsToDisplay.length < MINIMUM_EVENTS_DISPLAY) {
-    const placeholdersNeeded = MINIMUM_EVENTS_DISPLAY - eventsToDisplay.length;
-    eventsToDisplay.push(...generatePlaceholders(placeholdersNeeded, existingEventIds));
-  }
-  eventsToDisplay = eventsToDisplay.slice(0, MINIMUM_EVENTS_DISPLAY); // Ensure only MINIMUM_EVENTS_DISPLAY are shown
+  useEffect(() => {
+    if (location.hash === '#time-donation-page-volunteer-form') {
+      const element = document.getElementById('time-donation-page-volunteer-form');
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [location]);
+
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -91,6 +107,30 @@ const TimeDonationPage = () => {
       transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" },
     }),
   };
+
+  const renderOpportunityCard = (item, index) => {
+    const cardData = {
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      date: item.date,
+      location: item.location,
+      category: item.category,
+      photos: item.photos,
+      youtube_link: item.youtube_link,
+      type: item.type, 
+      status: item.status,
+    };
+
+    const detailLink = item.type === 'initiative' ? `/initiatives-events/${item.id}` : `/events/${item.id}`;
+
+    return (
+      <motion.custom key={item.id || `item-${index}`} custom={index} initial="hidden" animate="visible" variants={cardVariants}>
+        <EventCard event={{...cardData, detailLink: detailLink}} />
+      </motion.custom>
+    );
+  };
+
 
   return (
     <div className="container mx-auto px-4">
@@ -125,35 +165,33 @@ const TimeDonationPage = () => {
 
       <SectionWrapper id="upcoming-opportunities" className="bg-primary/5 rounded-xl py-16 md:py-20">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Upcoming Volunteer Opportunities</h2>
-        {loadingEvents && (
+        {loading && (
           <div className="text-center py-12">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading upcoming events...</p>
+            <p className="text-muted-foreground">Loading upcoming opportunities...</p>
           </div>
         )}
-        {!loadingEvents && eventsToDisplay.length === 0 && (
+        {!loading && opportunities.length === 0 && (
            <div className="text-center py-12">
             <AlertTriangle className="h-16 w-16 text-primary/30 mx-auto mb-4" />
             <p className="text-muted-foreground">No upcoming volunteer opportunities right now. Please fill the form below to get notified!</p>
           </div>
         )}
-        {!loadingEvents && eventsToDisplay.length > 0 && (
+        {!loading && opportunities.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {eventsToDisplay.map((event, index) => (
-              <motion.custom key={event.id || `event-${index}`} custom={index} initial="hidden" animate="visible" variants={cardVariants}>
-                <EventCard event={event} />
-              </motion.custom>
-            ))}
+            {opportunities.slice(0, 6).map((item, index) => renderOpportunityCard(item, index))}
           </div>
         )}
-        <div className="text-center mt-12">
-            <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                <Link to="/initiatives-events">View All Events & Initiatives</Link>
-            </Button>
-        </div>
+        {!loading && opportunities.length > 0 && (
+            <div className="text-center mt-12">
+                <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                    <Link to="/initiatives-events">View All Events & Initiatives</Link>
+                </Button>
+            </div>
+        )}
       </SectionWrapper>
       
-      <VolunteerFormSection formIdPrefix="time" />
+      <VolunteerFormSection formIdPrefix="time-donation-page" />
 
     </div>
   );

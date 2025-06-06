@@ -1,118 +1,80 @@
 import React from 'react';
-import { HeartHandshake, Users, BookOpen, Leaf, ShieldHalf, Palette } from 'lucide-react';
+import { HeartHandshake, Users, BookOpen, Leaf, ShieldHalf, Palette, Zap, Sparkles } from 'lucide-react';
+
+const DEFAULT_NGO_GALLERY_IMAGE = "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80";
 
 export const staticNgoData = [
   {
-    id: 'static-ngo-1', // Use a distinct ID if this might clash with DB UUIDs
-    slug: 'hope-foundation-static',
-    name: 'Hope Foundation (Sample)',
-    logo_url: '/images/ngos/hope-foundation-logo.png',
-    short_description: 'Empowering children through education and nutrition in urban slums.',
-    full_description: "Hope Foundation is a non-profit organization dedicated to breaking the cycle of poverty by providing quality education, nutritious meals, and healthcare to underprivileged children living in urban slum communities. We believe every child deserves a chance to reach their full potential.",
-    mission: "To create a brighter future for children by ensuring access to education, health, and a supportive environment.",
-    work_area: 'Bangalore Urban Slums, Karnataka',
+    id: 'static-ngo-5', 
+    slug: 'sampoorna-foundation',
+    name: 'Sampoorna Foundation',
+    logo_url: '/images/ngos/sampoorna-logo-placeholder.png', 
+    short_description: 'Giving wings to children through holistic education to bring impactful change in their lives.',
+    full_description: "Sampoorna foundation is dedicated to convey the power of education for underprivileged children while creating an environment for holistic development through quality teaching and out-of-classroom activities. We believe in utilising our own knowledge and also encourage efforts from like minded individuals who share the same vision/goal.",
+    mission: "To provide children with the necessary resources in order to create responsible and productive citizens of tomorrow.",
+    work_area: 'Community Learning Centers',
     impact_highlights: [
-      { text: "Provided daily meals to 500+ children in 2023." },
-      { text: "Enrolled 200+ out-of-school children into formal education." },
-      { text: "Conducted health camps benefiting over 1000 community members." }
+      { text: "Organised 10+ developmental workshops for children." },
+      { text: "Educated 75+ underprivileged students." },
+      { text: "5+ active initiatives with more than 50 volunteers." },
+      { text: "Programmes such as “send a child to school” which has helped sponsor the education of 12 children." }
     ],
-    website_url: 'https://example-hopefoundation.org',
-    instagram_handle: 'HopeFoundationIndia',
-    tags: ['Education', 'Nutrition', 'Child Welfare', 'Healthcare'],
-    icon: <BookOpen className="h-10 w-10 text-primary" /> // For card display if needed
+    website_url: '#',
+    instagram_handle: 'sampoornafoundation',
+    tags: ['Education', 'Child Welfare', 'Skill Building', 'Extracurricular Activities', 'Learning'],
+    icon: <BookOpen className="h-10 w-10 text-primary" />,
+    photos: [
+        "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=60",
+        "https://images.unsplash.com/photo-1542744095-291d1f67b221?auto=format&fit=crop&w=800&q=60",
+        DEFAULT_NGO_GALLERY_IMAGE
+    ]
   },
   {
-    id: 'static-ngo-2',
-    slug: 'green-earth-initiative-static',
-    name: 'Green Earth Initiative (Sample)',
-    logo_url: '/images/ngos/green-earth-logo.png',
-    short_description: 'Protecting local ecosystems through plantation and awareness.',
-    full_description: "Green Earth Initiative is committed to environmental sustainability. We organize tree plantation drives, conduct waste management workshops, and run awareness campaigns in schools and communities to foster a love for nature and promote responsible living.",
-    mission: "To conserve and restore natural ecosystems for a healthier planet and promote environmental stewardship among communities.",
-    work_area: 'Various locations in South India',
+    id: 'static-ngo-6',
+    slug: 'lucky-tails',
+    name: 'Lucky Tails',
+    logo_url: '/images/ngos/luckytails-logo-placeholder.png', 
+    short_description: 'A small group of committed people working towards the welfare of stray animals.',
+    full_description: "Lucky tails is a non-governmental organisation which is dedicated towards improving the life of stray animals. We believe that we can create a world where no one goes hungry, uncared for or unloved. Hence, people at Lucky tails work tirelessly to rescue, nurture and create a safe space for all our furry friends.",
+    mission: "To rescue, rehabilitate and promote adoption of strays through compassion, consistent care and spreading awareness.",
+    work_area: 'Local Community Shelters & Streets',
     impact_highlights: [
-      { text: "Planted over 10,000 saplings in the last two years." },
-      { text: "Reached 5000+ students through environmental workshops." },
-      { text: "Initiated 5 community composting projects." }
+      { text: "Daily feeding drives." },
+      { text: "70+ animals rescued." },
+      { text: "Provides regular rehabilitation and medical care for those in need." },
+      { text: "Frequent pet rescue and adoption campaigns." }
     ],
-    website_url: 'https://example-greenearth.org',
-    instagram_handle: 'GreenEarthOfficial',
-    tags: ['Environment', 'Conservation', 'Sustainability', 'Awareness'],
-    icon: <Leaf className="h-10 w-10 text-primary" />
+    website_url: '#',
+    instagram_handle: 'luckytailsrescue',
+    tags: ['Animal Rescue', 'Animal Rehabilitation', 'Animal Welfare', 'Adoption'],
+    icon: <HeartHandshake className="h-10 w-10 text-primary" />,
+    photos: [
+        "https://images.unsplash.com/photo-1559247448-8c95936056f8?auto=format&fit=crop&w=800&q=60",
+        "https://images.unsplash.com/photo-1548681528-6a5c45b66b42?auto=format&fit=crop&w=800&q=60",
+        DEFAULT_NGO_GALLERY_IMAGE
+    ]
   },
   {
-    id: 'static-ngo-3',
-    slug: 'eldercare-connect-static',
-    name: 'ElderCare Connect (Sample)',
-    logo_url: '/images/ngos/eldercare-logo.png',
-    short_description: 'Providing companionship and support to senior citizens.',
-    full_description: "ElderCare Connect focuses on improving the quality of life for elderly individuals, especially those living alone or in assisted care facilities. We offer companionship programs, health monitoring assistance, and recreational activities to combat loneliness and promote active aging.",
-    mission: "To ensure dignity, respect, and joyful companionship for every senior citizen in our community.",
-    work_area: 'Metropolitan Cities',
+    id: 'static-ngo-7',
+    slug: 'sneh-community',
+    name: 'Sneh',
+    logo_url: '/images/ngos/sneh-logo-placeholder.png', 
+    short_description: 'Learn. Yearn. Turn. Empowering underprivileged children through community action.',
+    full_description: "Sneh is a community led by compassionate women working towards uplifting and empowering underprivileged children. Guided by our core motto “Learn. Yearn. Turn.”, we believe in the power of knowledge, empathy and action. At Sneh, we strive to nurture not just minds, but also hearts. Through education, mentorship and projects focused on equipping students with other skills, we intend to inspire children to create a brighter future.",
+    mission: "Our mission is to empower dreams and support children in order to reach their full potential. We aim to educate while also facilitating out-of-textbook skills which contributes to the overall development of our little ones.",
+    work_area: 'Community Centers & Schools',
     impact_highlights: [
-      { text: "Paired 150+ volunteers with elderly individuals for regular visits." },
-      { text: "Organized 20+ recreational events for seniors in old age homes." },
-      { text: "Provided basic health check-ups for 300+ elderly persons." }
+      { text: "Multiple collaborations with local schools and community groups." },
+      { text: "Rich network of dedicated volunteers contributing diverse skills." }
     ],
-    website_url: 'https://example-eldercare.org',
-    instagram_handle: 'ElderCareConnect',
-    tags: ['Elderly Care', 'Companionship', 'Healthcare', 'Community Support'],
-    icon: <ShieldHalf className="h-10 w-10 text-primary" />
-  },
-  {
-    id: 'static-ngo-4',
-    slug: 'kala-sangam-static',
-    name: 'Kala Sangam (Sample)',
-    logo_url: '/images/ngos/kala-sangam-logo.png',
-    short_description: 'Promoting traditional arts and empowering local artisans.',
-    full_description: "Kala Sangam is dedicated to the preservation and promotion of traditional Indian art forms. We work with local artisans, providing them with platforms to showcase their skills, access to markets, and training in contemporary design and business practices.",
-    mission: "To sustain and celebrate India's rich artistic heritage by empowering artisans and fostering appreciation for traditional crafts.",
-    work_area: 'Rural Artisan Clusters, Pan-India',
-    impact_highlights: [
-      { text: "Supported 100+ artisan families through fair trade practices." },
-      { text: "Organized 15 exhibitions showcasing traditional art forms." },
-      { text: "Conducted skill upgradation workshops for 200+ artisans." }
-    ],
-    website_url: 'https://example-kalasangam.org',
-    instagram_handle: 'KalaSangamArts',
-    tags: ['Arts & Culture', 'Artisan Support', 'Heritage', 'Livelihood'],
-    icon: <Palette className="h-10 w-10 text-primary" />
+    website_url: '#',
+    instagram_handle: 'snehcommunity',
+    tags: ['Education', 'Volunteering', 'Child Welfare', 'Skill Development', 'Learning'],
+    icon: <Sparkles className="h-10 w-10 text-primary" />,
+    photos: [
+        "https://images.unsplash.com/photo-1531482615713-2c65c24babc4?auto=format&fit=crop&w=800&q=60",
+        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=60",
+        DEFAULT_NGO_GALLERY_IMAGE
+    ]
   }
 ];
-
-// Function to populate Supabase if table is empty (run once manually or via a script)
-// This is illustrative; actual seeding might be done via Supabase dashboard or a migration script.
-/*
-import { supabase } from '@/lib/supabaseClient';
-export async function seedNgoProfiles() {
-  const { data: existingNgos, error: fetchError } = await supabase.from('ngo_profiles').select('id').limit(1);
-  if (fetchError) {
-    console.error("Error checking existing NGOs:", fetchError);
-    return;
-  }
-  if (existingNgos && existingNgos.length > 0) {
-    console.log("NGO profiles table already has data. Skipping seed.");
-    return;
-  }
-
-  const { error } = await supabase.from('ngo_profiles').insert(staticNgoData.map(ngo => ({
-    slug: ngo.slug,
-    name: ngo.name,
-    logo_url: ngo.logo_url,
-    short_description: ngo.short_description,
-    full_description: ngo.full_description,
-    mission: ngo.mission,
-    work_area: ngo.work_area,
-    impact_highlights: ngo.impact_highlights,
-    website_url: ngo.website_url,
-    instagram_handle: ngo.instagram_handle,
-    tags: ngo.tags
-  })));
-
-  if (error) {
-    console.error('Error seeding NGO profiles:', error);
-  } else {
-    console.log('Successfully seeded NGO profiles with static data.');
-  }
-}
-*/

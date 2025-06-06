@@ -1,25 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react'; // Changed from Gift to Heart for a warmer feel
+import { MessageSquare as SocialIcon } from 'lucide-react'; // Changed icon
 import { motion } from 'framer-motion';
 
 const FloatingDonateButton = () => {
   return (
     <motion.div
-      initial={{ scale: 0, opacity: 0, y: 50 }}
-      animate={{ scale: 1, opacity: 1, y: 0 }}
-      transition={{ delay: 1, duration: 0.5, type: 'spring', stiffness: 120 }}
-      className="fixed bottom-8 right-8 z-50" // Increased spacing from edge
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.5, type: 'spring', stiffness: 120 }}
+      className="fixed bottom-6 right-6 z-50"
     >
       <Button 
         asChild 
         size="lg" 
-        className="rounded-full shadow-soft-hover bg-primary hover:bg-primary-soft text-primary-foreground h-14 w-14 p-0 md:h-auto md:w-auto md:px-6 md:py-3"
+        className="rounded-full shadow-xl bg-gradient-to-r from-secondary to-primary hover:from-secondary/90 hover:to-primary/90 text-primary-foreground pl-5 pr-6 py-6 group"
       >
-        <Link to="/donate/money" className="flex items-center justify-center">
-          <Heart className="h-6 w-6 md:mr-2 fill-current" /> {/* Fill current for solid heart */}
-          <span className="hidden md:inline">Donate Now</span>
+        <Link to="/social-change-circle"> {/* Changed link */}
+          <SocialIcon className="h-5 w-5 mr-2.5 transition-transform duration-300 group-hover:scale-110" />
+          <span className="font-semibold">Join Us Now</span> {/* Changed text */}
         </Link>
       </Button>
     </motion.div>

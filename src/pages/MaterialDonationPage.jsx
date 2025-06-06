@@ -63,6 +63,8 @@ const MaterialDonationPage = () => {
     preferredLocation: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,12 +73,20 @@ const MaterialDonationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.items) {
-      toast({ title: "Incomplete Form", description: "Please fill in your name, email, and items to donate.", variant: "destructive" });
+    setIsSubmitting(true);
+    if (!formData.name || !formData.email || !formData.items || !formData.phone) {
+      toast({ title: "Incomplete Form", description: "Please fill in your name, email, phone, and items to donate.", variant: "destructive" });
+      setIsSubmitting(false);
       return;
     }
-     if (!/\S+@\S+\.\S+/.test(formData.email)) {
+     if (!/\S+@\S+\.\S+$/.test(formData.email)) {
       toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
+      setIsSubmitting(false);
+      return;
+    }
+    if (!/^\d{10,}$/.test(formData.phone.replace(/\s+/g, ''))) {
+      toast({ title: "Invalid Phone Number", description: "Please enter a valid 10-digit phone number.", variant: "destructive" });
+      setIsSubmitting(false);
       return;
     }
     
@@ -92,7 +102,8 @@ const MaterialDonationPage = () => {
           message: formData.message
         }
       ]);
-
+    
+    setIsSubmitting(false);
     if (error) {
       toast({ title: "Submission Error", description: error.message, variant: "destructive" });
     } else {
@@ -180,8 +191,8 @@ const MaterialDonationPage = () => {
                 <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="E.g., rohan@example.com" required className="mt-1 rounded-lg"/>
               </div>
               <div>
-                <Label htmlFor="phone" className="font-medium">Phone Number (Optional)</Label>
-                <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="E.g., 9876543210" className="mt-1 rounded-lg"/>
+                <Label htmlFor="phone" className="font-medium">Phone Number <span className="text-destructive">*</span></Label>
+                <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="E.g., 9876543210" required className="mt-1 rounded-lg"/>
               </div>
             </div>
             <div>
@@ -206,8 +217,8 @@ const MaterialDonationPage = () => {
               <Label htmlFor="message" className="font-medium">Additional Message (Optional)</Label>
               <Textarea id="message" name="message" value={formData.message} onChange={handleInputChange} placeholder="Any specific details or questions?" className="mt-1 rounded-lg" rows={2}/>
             </div>
-            <Button type="submit" size="lg" className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground py-3 text-base">
-              <CheckCircle className="h-5 w-5 mr-2" /> Submit Donation Details
+            <Button type="submit" size="lg" className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground py-3 text-base" disabled={isSubmitting}>
+              <CheckCircle className="h-5 w-5 mr-2" /> {isSubmitting ? 'Submitting...' : 'Submit Donation Details'}
             </Button>
           </form>
         </Card>
@@ -236,7 +247,7 @@ const MaterialDonationPage = () => {
           ))}
         </div>
         <p className="text-center text-muted-foreground mt-8 text-sm">
-          For large donations or if you need to arrange a pickup, please mention it in the form above or contact us at <a href="mailto:materials@letsdonate.org" className="text-primary hover:underline">materials@letsdonate.org</a>.
+          For large donations or if you need to arrange a pickup, please mention it in the form above or contact us at <a href="mailto:letsdonateofficial@gmail.com" className="text-primary hover:underline">letsdonateofficial@gmail.com</a>.
         </p>
       </SectionWrapper>
     </div>

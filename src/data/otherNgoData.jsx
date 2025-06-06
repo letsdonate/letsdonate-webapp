@@ -1,7 +1,7 @@
 import React from 'react';
 import { HeartHandshake as Handshake, Users, ExternalLink } from 'lucide-react';
 
-export const otherNgoInitiatives = [
+export const otherNgoData = [
   {
     id: 'ngo-partner-1',
     name: 'Hope Foundation',
@@ -12,7 +12,9 @@ export const otherNgoInitiatives = [
     volunteerLink: '#', // Replace with actual volunteer registration link
     icon: <Handshake className="h-10 w-10 text-primary" />,
     themeColor: 'bg-blue-500/10',
-    imagePlaceholder: "Children smiling and learning at a Hope Foundation center"
+    imagePlaceholder: "Children smiling and learning at a Hope Foundation center",
+    image: "https://images.unsplash.com/photo-1504159506828-3f03137910a7?auto=format&fit=crop&w=600&q=60", // Example image
+    areaOfWork: "Education" // Added for consistency with filtering
   },
   {
     id: 'ngo-partner-2',
@@ -24,7 +26,9 @@ export const otherNgoInitiatives = [
     volunteerLink: '#',
     icon: <Users className="h-10 w-10 text-primary" />,
     themeColor: 'bg-green-500/10',
-    imagePlaceholder: "Volunteers planting saplings for Green Earth Initiative"
+    imagePlaceholder: "Volunteers planting saplings for Green Earth Initiative",
+    image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=600&q=60",
+    areaOfWork: "Environment"
   },
   {
     id: 'ngo-partner-3',
@@ -36,7 +40,9 @@ export const otherNgoInitiatives = [
     volunteerLink: '#',
     icon: <ExternalLink className="h-10 w-10 text-primary" />,
     themeColor: 'bg-purple-500/10',
-    imagePlaceholder: "A volunteer spending time with an elderly person at ElderCare Connect"
+    imagePlaceholder: "A volunteer spending time with an elderly person at ElderCare Connect",
+    image: "https://images.unsplash.com/photo-1576765608866-5b510406695c?auto=format&fit=crop&w=600&q=60",
+    areaOfWork: "Healthcare"
   },
    {
     id: 'ngo-partner-4',
@@ -48,6 +54,8 @@ export const otherNgoInitiatives = [
     volunteerLink: '#',
     icon: <Handshake className="h-10 w-10 text-primary" />,
     themeColor: 'bg-orange-500/10',
-    imagePlaceholder: "A volunteer caring for a rescued dog at Animal Welfare Squad"
+    imagePlaceholder: "A volunteer caring for a rescued dog at Animal Welfare Squad",
+    image: "https://images.unsplash.com/photo-1597753010299-0df1ipc39f65?auto=format&fit=crop&w=600&q=60",
+    areaOfWork: "Animal Welfare"
   }
 ];

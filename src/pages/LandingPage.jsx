@@ -1,272 +1,37 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import AnimatedCounter from '@/components/shared/AnimatedCounter';
-import { Clock, DollarSign, Gift, Users, BookOpen, Home, Eye, Send, BookHeart, CheckSquare, CalendarDays, Users2, HelpCircle, UserPlus, Cake, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/lib/supabaseClient';
-import { Checkbox } from "@/components/ui/checkbox";
-
-const heroSlidesData = [
-  {
-    titlePart1: "Be the reason someone believes in",
-    titleHighlight: "kindness",
-    titlePart2: "again.",
-    subtitle: "Join Let's Donate and make a tangible difference in the lives of those who need it most.",
-    buttonText: "Join as a Volunteer",
-    buttonLink: "/donate/time",
-    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/vrhwd4vsx1ieykwokmrcu/Carousel_1.jpg?rlkey=6u6rv3u7jf9snsdou8j0ehc6a" 
-  },
-  {
-    titlePart1: "Make your special day",
-    titleHighlight: "meaningful",
-    titlePart2: ".",
-    subtitle: "Celebrate your birthday by supporting a cause close to your heart. Spread joy with Let's Donate.",
-    buttonText: "Celebrate With Us",
-    buttonLink: "/celebrate-birthday",
-    imageSrc: "https://images.unsplash.com/photo-1560439514-e960a3ef50d9" 
-  },
-  {
-    titlePart1: "Every",
-    titleHighlight: "contribution",
-    titlePart2: "counts.",
-    subtitle: "Your financial support empowers our projects and helps us reach more communities in need.",
-    buttonText: "Donate Funds",
-    buttonLink: "/donate/money",
-    imageSrc: "https://images.unsplash.com/photo-1604594899087-9852147a1136" 
-  },
-  {
-    titlePart1: "Share your",
-    titleHighlight: "resources",
-    titlePart2: ".",
-    subtitle: "Donate materials like books, clothes, or toys and directly impact someone's life.",
-    buttonText: "Gift Items",
-    buttonLink: "/donate/material",
-    imageSrc: "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8" 
-  },
-];
+import HeroCarousel from '@/components/landing/HeroCarousel';
+import VolunteerFormSection from '@/components/landing/VolunteerFormSection';
+import { Clock, Gift, Users, Home as HomeIcon, Eye, BookHeart, UserPlus, Cake } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 
 const donationOptions = [
   { title: 'Donate Time', description: 'Volunteer your skills and become part of our mission.', icon: <Clock className="h-10 w-10 text-primary mb-4" />, link: '/donate/time', cta: 'Volunteer Now' },
   { title: 'Donate Material', description: 'Gift essentials like books, clothes, and toys.', icon: <Gift className="h-10 w-10 text-primary mb-4" />, link: '/donate/material', cta: 'Gift Items' },
-  { title: 'Donate Money', description: 'Support our projects financially for direct impact.', icon: <DollarSign className="h-10 w-10 text-primary mb-4" />, link: '/donate/money', cta: 'Give Financially' },
+  { title: 'Donate Money', description: 'Support our projects financially for direct impact.', icon: <span className="font-bold text-4xl text-primary mb-4">₹</span>, link: '/donate/money', cta: 'Give Financially' },
   { title: 'Celebrate With Us', description: 'Make your special occasions meaningful by giving back.', icon: <Cake className="h-10 w-10 text-primary mb-4" />, link: '/celebrate-birthday', cta: 'Celebrate & Donate' },
 ];
 
 const achievements = [
-  { end: 14, suffix: '+', label: 'Institutes Served', icon: <Home className="h-10 w-10 text-secondary mx-auto mb-3" /> },
-  { end: 5000, suffix: '+', label: 'Sessions Conducted', icon: <BookHeart className="h-10 w-10 text-secondary mx-auto mb-3" /> },
-  { end: 2000, suffix: '+', label: 'People Impacted', icon: <Users className="h-10 w-10 text-secondary mx-auto mb-3" /> },
+  { end: 2000, suffix: '+', label: 'Children Impacted', icon: <Users className="h-10 w-10 text-secondary mx-auto mb-3" /> },
   { end: 300, suffix: '+', label: 'Volunteers Onboarded', icon: <UserPlus className="h-10 w-10 text-secondary mx-auto mb-3" /> },
+  { end: 5000, suffix: '+', label: 'Sessions Conducted', icon: <BookHeart className="h-10 w-10 text-secondary mx-auto mb-3" /> },
+  { end: 14, suffix: '+', label: 'Institutes Served', icon: <HomeIcon className="h-10 w-10 text-secondary mx-auto mb-3" /> },
 ];
+
 
 const galleryImages = [
-  { srcPlaceholder: "Joyful children learning in a classroom setting", alt: "Children learning with volunteers" },
-  { srcPlaceholder: "Volunteers distributing supplies to a community", alt: "Volunteers distributing supplies" },
-  { srcPlaceholder: "A group of happy volunteers posing together", alt: "Happy volunteers group photo" },
+  { srcPlaceholder: "Joyful children learning in a classroom setting", alt: "Children learning with volunteers", actualSrc: "https://images.unsplash.com/photo-1595872018818-97555653a011?auto=format&fit=crop&w=600&q=80" },
+  { srcPlaceholder: "Volunteers distributing supplies to a community", alt: "Volunteers distributing supplies", actualSrc: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&w=600&q=80" },
+  { srcPlaceholder: "A group of happy volunteers posing together", alt: "Happy volunteers group photo", actualSrc: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80" },
 ];
-
-const areasOfInterestOptions = [
-  { id: 'teaching', label: 'Teaching & Tutoring' },
-  { id: 'admin', label: 'Administrative Support' },
-  { id: 'photography', label: 'Photography & Videography' },
-  { id: 'events', label: 'Event Management & Support' },
-  { id: 'fundraising', label: 'Fundraising & Outreach' },
-  { id: 'mentorship', label: 'Mentorship Programs' },
-  { id: 'skills', label: 'Skill-based Workshops (Art, Music, etc.)' },
-  { id: 'other', label: 'Other (Please specify)' },
-];
-
-const VolunteerFormSection = ({ formIdPrefix = "home" }) => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phoneNumber: '',
-    city: '',
-    age: '',
-    areasOfInterest: [],
-    availability: '',
-    whyVolunteer: '',
-    howHeard: '',
-    otherAreaOfInterest: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (areaId) => {
-    setFormData(prev => {
-      const newAreas = prev.areasOfInterest.includes(areaId)
-        ? prev.areasOfInterest.filter(area => area !== areaId)
-        : [...prev.areasOfInterest, areaId];
-      return { ...prev, areasOfInterest: newAreas };
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    if (!formData.fullName || !formData.email || !formData.phoneNumber || !formData.age) {
-      toast({ title: "Incomplete Form", description: "Please fill in Full Name, Email, Phone Number, and Age.", variant: "destructive" });
-      setIsSubmitting(false);
-      return;
-    }
-    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
-      setIsSubmitting(false);
-      return;
-    }
-    if (isNaN(parseInt(formData.age)) || parseInt(formData.age) <= 0) {
-        toast({ title: "Invalid Age", description: "Please enter a valid age.", variant: "destructive" });
-        setIsSubmitting(false);
-        return;
-    }
-
-    let finalAreasOfInterest = formData.areasOfInterest.join(', ');
-    if (formData.areasOfInterest.includes('other') && formData.otherAreaOfInterest) {
-      finalAreasOfInterest += `, Other: ${formData.otherAreaOfInterest}`;
-    }
-    
-    const { data, error } = await supabase
-      .from('volunteer_applications')
-      .insert([{ 
-        full_name: formData.fullName, 
-        email: formData.email, 
-        phone_number: formData.phoneNumber,
-        city: formData.city,
-        age: parseInt(formData.age),
-        areas_of_interest: finalAreasOfInterest,
-        availability: formData.availability,
-        reason_to_volunteer: formData.whyVolunteer,
-        how_they_heard: formData.howHeard,
-      }]);
-
-    setIsSubmitting(false);
-    if (error) {
-      toast({ title: "Application Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({
-        title: "Application Submitted! 🙌",
-        description: `Thank you, ${formData.fullName}! We've received your volunteer application and will be in touch soon.`,
-        className: "bg-primary text-primary-foreground",
-        duration: 7000
-      });
-      setFormData({ fullName: '', email: '', phoneNumber: '', city: '', age: '', areasOfInterest: [], availability: '', whyVolunteer: '', howHeard: '', otherAreaOfInterest: '' });
-    }
-  };
-
-  return (
-    <SectionWrapper id={`${formIdPrefix}-volunteer-form`} className="bg-secondary/10 rounded-xl py-16 md:py-20">
-      <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-4">Become a Volunteer Today</h2>
-      <p className="text-center text-muted-foreground mb-12 md:mb-16 max-w-xl mx-auto">
-        Join our passionate team and make a direct impact. Fill out the form below to get started!
-      </p>
-      <Card className="max-w-3xl mx-auto p-6 sm:p-8 rounded-xl shadow-soft bg-background">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor={`${formIdPrefix}-fullName`} className="font-medium">Full Name <span className="text-destructive">*</span></Label>
-              <Input id={`${formIdPrefix}-fullName`} name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="E.g., Priya Sharma" required className="mt-1 rounded-lg"/>
-            </div>
-            <div>
-              <Label htmlFor={`${formIdPrefix}-email`} className="font-medium">Email Address <span className="text-destructive">*</span></Label>
-              <Input id={`${formIdPrefix}-email`} name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="E.g., priya@example.com" required className="mt-1 rounded-lg"/>
-            </div>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor={`${formIdPrefix}-phoneNumber`} className="font-medium">Phone Number <span className="text-destructive">*</span></Label>
-              <Input id={`${formIdPrefix}-phoneNumber`} name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleInputChange} placeholder="E.g., 9876543210" required className="mt-1 rounded-lg"/>
-            </div>
-            <div>
-              <Label htmlFor={`${formIdPrefix}-city`} className="font-medium">City</Label>
-              <Input id={`${formIdPrefix}-city`} name="city" value={formData.city} onChange={handleInputChange} placeholder="E.g., Bangalore" className="mt-1 rounded-lg"/>
-            </div>
-          </div>
-          <div>
-            <Label htmlFor={`${formIdPrefix}-age`} className="font-medium">Age <span className="text-destructive">*</span></Label>
-            <Input id={`${formIdPrefix}-age`} name="age" type="number" value={formData.age} onChange={handleInputChange} placeholder="E.g., 25" required className="mt-1 rounded-lg"/>
-          </div>
-          <div>
-            <Label className="font-medium block mb-2">Area(s) of Interest</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
-              {areasOfInterestOptions.map(option => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`${formIdPrefix}-area-${option.id}`} 
-                    checked={formData.areasOfInterest.includes(option.id)}
-                    onCheckedChange={() => handleCheckboxChange(option.id)}
-                  />
-                  <Label htmlFor={`${formIdPrefix}-area-${option.id}`} className="text-sm font-normal text-muted-foreground cursor-pointer">{option.label}</Label>
-                </div>
-              ))}
-            </div>
-            {formData.areasOfInterest.includes('other') && (
-              <Input 
-                name="otherAreaOfInterest" 
-                value={formData.otherAreaOfInterest} 
-                onChange={handleInputChange} 
-                placeholder="Please specify other area" 
-                className="mt-2 rounded-lg"
-              />
-            )}
-          </div>
-          <div>
-            <Label htmlFor={`${formIdPrefix}-availability`} className="font-medium">Availability</Label>
-            <Input id={`${formIdPrefix}-availability`} name="availability" value={formData.availability} onChange={handleInputChange} placeholder="E.g., Weekends, Weekday evenings" className="mt-1 rounded-lg"/>
-          </div>
-          <div>
-            <Label htmlFor={`${formIdPrefix}-whyVolunteer`} className="font-medium">Why do you want to volunteer?</Label>
-            <Textarea id={`${formIdPrefix}-whyVolunteer`} name="whyVolunteer" value={formData.whyVolunteer} onChange={handleInputChange} placeholder="Share your motivation (short text)" className="mt-1 rounded-lg" rows={3}/>
-          </div>
-          <div>
-            <Label htmlFor={`${formIdPrefix}-howHeard`} className="font-medium">Where did you hear about us?</Label>
-            <Input id={`${formIdPrefix}-howHeard`} name="howHeard" value={formData.howHeard} onChange={handleInputChange} placeholder="E.g., Social Media, Friend, Event" className="mt-1 rounded-lg"/>
-          </div>
-          <Button type="submit" size="lg" className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground py-3 text-base" disabled={isSubmitting}>
-            <Send className="h-5 w-5 mr-2" /> {isSubmitting ? 'Submitting...' : 'Submit Application'}
-          </Button>
-        </form>
-      </Card>
-    </SectionWrapper>
-  );
-};
-
 
 const LandingPage = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const slideIntervalRef = useRef(null);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlidesData.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroSlidesData.length) % heroSlidesData.length);
-  };
-
-  useEffect(() => {
-    slideIntervalRef.current = setInterval(nextSlide, 7000); // Change slide every 7 seconds
-    return () => clearInterval(slideIntervalRef.current);
-  }, []);
-
-  const handleManualNavigation = () => {
-    clearInterval(slideIntervalRef.current);
-    slideIntervalRef.current = setInterval(nextSlide, 10000); // Reset interval after manual navigation
-  };
-  
   const cardVariants = {
     hidden: { opacity: 0, y: 30, scale: 0.95 },
     visible: (i) => ({
@@ -281,97 +46,27 @@ const LandingPage = () => {
     }),
   };
 
-  const slideContentVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.4, ease: "easeIn" } }
-  };
-
   return (
     <div className="space-y-16 md:space-y-24">
-      <SectionWrapper fullWidth className="!py-0 relative min-h-[70vh] md:min-h-[85vh] flex items-center justify-center text-center overflow-hidden">
-        <AnimatePresence initial={false} mode="wait">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 z-0"
-          >
-            <img 
-              className="w-full h-full object-cover object-center"
-              alt={heroSlidesData[currentSlide].titleHighlight}
-              src={heroSlidesData[currentSlide].imageSrc} 
-            />
-            <div className="absolute inset-0 teal-overlay-gradient z-10"></div>
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="relative z-20 container mx-auto px-4 py-10 text-white">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              variants={slideContentVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 leading-tight shadow-text">
-                {heroSlidesData[currentSlide].titlePart1}{' '}
-                <span className="text-secondary">{heroSlidesData[currentSlide].titleHighlight}</span>{' '}
-                {heroSlidesData[currentSlide].titlePart2}
-              </h1>
-              <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto font-light">
-                {heroSlidesData[currentSlide].subtitle}
-              </p>
-              <Button 
-                size="lg" 
-                asChild 
-                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-xl px-10 py-3 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105"
-              >
-                <Link to={heroSlidesData[currentSlide].buttonLink}>{heroSlidesData[currentSlide].buttonText}</Link>
-              </Button>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        
-        {/* Carousel Navigation */}
-        <button 
-            onClick={() => { prevSlide(); handleManualNavigation(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full transition-colors"
-            aria-label="Previous slide"
-        >
-            <ChevronLeft size={28} />
-        </button>
-        <button 
-            onClick={() => { nextSlide(); handleManualNavigation(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full transition-colors"
-            aria-label="Next slide"
-        >
-            <ChevronRight size={28} />
-        </button>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
-            {heroSlidesData.map((_, index) => (
-                <button
-                    key={index}
-                    onClick={() => { setCurrentSlide(index); handleManualNavigation(); }}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-secondary scale-125' : 'bg-white/50 hover:bg-white/80'}`}
-                    aria-label={`Go to slide ${index + 1}`}
-                />
-            ))}
-        </div>
+      <SectionWrapper fullWidth className="!pt-0">
+        <HeroCarousel />
       </SectionWrapper>
 
       <SectionWrapper id="about-intro">
         <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let's Donate</h2>
-          <p className="text-lg md:text-xl text-muted-foreground mb-8">
-            Let's Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
-          </p>
-          <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 hover:text-primary rounded-lg">
-            <Link to="/about-us">Discover Our Story</Link>
-          </Button>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let’s Donate</h2>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8">
+              Let’s Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
+            </p>
+            <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 hover:text-primary rounded-lg">
+              <Link to="/about-us">Discover Our Story</Link>
+            </Button>
+          </motion.div>
         </div>
       </SectionWrapper>
 
@@ -398,7 +93,7 @@ const LandingPage = () => {
       
       <SectionWrapper id="how-to-help">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">How Can You Help?</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"> {/* Changed to 4 columns for the new option */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {donationOptions.map((option, index) => (
             <motion.custom
               key={option.title}
@@ -447,7 +142,9 @@ const LandingPage = () => {
               <img 
                 className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                 alt={image.alt}
-               src="https://images.unsplash.com/photo-1595872018818-97555653a011" />
+                src={image.actualSrc} 
+                onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80'; }}
+              />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
             </motion.div>
           ))}
@@ -461,11 +158,10 @@ const LandingPage = () => {
         </div>
       </SectionWrapper>
 
-      <VolunteerFormSection formIdPrefix="home" />
+      <VolunteerFormSection formIdPrefix="home-landing" />
       
     </div>
   );
 };
 
 export default LandingPage;
-export { VolunteerFormSection };

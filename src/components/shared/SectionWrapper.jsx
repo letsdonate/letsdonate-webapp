@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -19,4 +18,3 @@ const SectionWrapper = ({ children, className, id, fullWidth = false }) => {
 };
 
 export default SectionWrapper;
-  

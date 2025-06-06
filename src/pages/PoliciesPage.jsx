@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
@@ -84,4 +83,3 @@ const PoliciesPage = () => {
 };
 
 export default PoliciesPage;
-  

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Send } from 'lucide-react'; // Changed Twitter to Youtube
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,16 +10,18 @@ import { supabase } from '@/lib/supabaseClient';
 const Footer = () => {
   const { toast } = useToast();
   const [newsletterEmail, setNewsletterEmail] = useState('');
+  const logoUrl = "https://storage.googleapis.com/hostinger-horizons-assets-prod/024023c4-ed43-42c4-98a8-13e531a971a7/1403027bd2dfb5dc7d6da370df8bd8cc.png";
+
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (newsletterEmail && /\S+@\S+\.\S+/.test(newsletterEmail)) {
       const { data, error } = await supabase
         .from('newsletter_subscriptions')
-        .insert([{ email: newsletterEmail }]);
+        .insert([{ email: newsletterEmail, submission_date: new Date().toISOString() }]);
 
       if (error) {
-        if (error.code === '23505') { // Unique violation
+        if (error.code === '23505') { 
             toast({
             title: "Already Subscribed!",
             description: "This email address is already on our newsletter list.",
@@ -56,10 +58,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
           <div>
             <Link to="/" className="flex items-center space-x-2 mb-4">
-              <img src="/logo-icon.svg" alt="Let's Donate Logo Icon" className="h-8 w-8" />
-              <span className="text-xl font-bold">
-                <span className="text-foreground/70 font-medium">Let's</span> <span className="text-primary font-bold">Donate</span>
-              </span>
+              <img src={logoUrl} alt="Let's Donate Logo" className="h-24 w-auto" /> {/* Increased logo size */}
             </Link>
             <p className="text-sm mb-2 text-muted-foreground">"Be the reason someone believes in kindness again."</p>
             <p className="text-sm text-muted-foreground">Spreading compassion and driving positive change together.</p>
@@ -71,7 +70,7 @@ const Footer = () => {
               <li><Link to="/about-us" className="text-muted-foreground hover:text-primary transition-colors duration-300">About Us</Link></li>
               <li><Link to="/donate/time" className="text-muted-foreground hover:text-primary transition-colors duration-300">Volunteer</Link></li>
               <li><Link to="/donate/money" className="text-muted-foreground hover:text-primary transition-colors duration-300">Donate Funds</Link></li>
-              <li><Link to="/events-gallery" className="text-muted-foreground hover:text-primary transition-colors duration-300">Our Impact</Link></li>
+              <li><Link to="/initiatives-events" className="text-muted-foreground hover:text-primary transition-colors duration-300">Our Impact</Link></li>
               <li><Link to="/policies" className="text-muted-foreground hover:text-primary transition-colors duration-300">Policies</Link></li>
             </ul>
           </div>
@@ -79,14 +78,20 @@ const Footer = () => {
           <div>
             <p className="font-semibold text-foreground mb-4 text-lg">Contact Us</p>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center text-muted-foreground"><Mail className="h-5 w-5 mr-3 text-primary" /> letsdonateofficial@gmail.com</li>
-              <li className="flex items-center text-muted-foreground"><Phone className="h-5 w-5 mr-3 text-primary" /> +91 8109710356</li>
-              <li className="flex items-center text-muted-foreground"><MapPin className="h-5 w-5 mr-3 text-primary" /> Raipur, Chhattisgarh</li>
+              <li className="flex items-center text-muted-foreground">
+                <Mail className="h-5 w-5 mr-3 text-primary" /> 
+                <a href="mailto:letsdonateofficial@gmail.com" className="hover:text-primary transition-colors">letsdonateofficial@gmail.com</a>
+              </li>
+              <li className="flex items-center text-muted-foreground">
+                <Phone className="h-5 w-5 mr-3 text-primary" /> 
+                <a href="tel:+918109710356" className="hover:text-primary transition-colors">+91 8109710356</a>
+                </li>
+              <li className="flex items-center text-muted-foreground"><MapPin className="h-5 w-5 mr-3 text-primary" /> Raipur, Chhattisgarh, India</li>
             </ul>
             <div className="flex space-x-4 mt-6">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors duration-300"><Instagram size={22}/></a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors duration-300"><Facebook size={22}/></a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors duration-300"><Twitter size={22}/></a>
+              <a href="https://www.instagram.com/letusdonate?igsh=MXkxNTUwNTFncGt5Mg==" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors duration-300"><Instagram size={22}/></a>
+              <a href="https://www.facebook.com/profile.php?id=61572359793375&mibextid=rS40aB7S9Ucbxw6v" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors duration-300"><Facebook size={22}/></a>
+              <a href="https://youtube.com/@letusdonate?si=j1hbobIU_LYbRbtL" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors duration-300"><Youtube size={22}/></a>
             </div>
           </div>
 
@@ -112,9 +117,10 @@ const Footer = () => {
             <p className="text-xs mt-3 text-muted-foreground">Get updates on our latest events and impact stories.</p>
           </div>
         </div>
-        <div className="border-t border-border/40 pt-8 text-center text-sm text-muted-foreground">
-          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Let's Donate. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground/80 mt-1">Making a difference through compassion and community action.</p>
+        <div className="border-t border-border/40 pt-8 text-center">
+          <p className="text-sm">&copy; {new Date().getFullYear()} Let's Donate. All Rights Reserved.</p>
+          <p className="text-xs text-muted-foreground mt-1">"All photos and videos of Let's Donate events must be approved before being shared publicly."</p>
+          <p className="text-xs text-muted-foreground/80 mt-2">Making a difference through compassion and community action.</p>
         </div>
       </div>
     </footer>

@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Assuming Select is created
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; 
 import { Cake, Gift, Users, Sparkles, Send, Calendar as CalendarIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabaseClient';
-import { staticInitiativesData } from '@/data/initiativesData'; // To populate initiative options
+import { staticInitiativesData } from '@/data/initiativesData'; 
 
 const CelebrateBirthdayPage = () => {
   const { toast } = useToast();
@@ -40,13 +40,18 @@ const CelebrateBirthdayPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!formData.name || !formData.email || !formData.birthdayDate || !formData.preferredInitiativeId) {
-      toast({ title: "Incomplete Form", description: "Please fill in Name, Email, Birthday, and Preferred Initiative.", variant: "destructive" });
+    if (!formData.name || !formData.email || !formData.birthdayDate || !formData.preferredInitiativeId || !formData.phone) {
+      toast({ title: "Incomplete Form", description: "Please fill in Name, Email, Phone, Birthday, and Preferred Initiative.", variant: "destructive" });
       setIsSubmitting(false);
       return;
     }
     if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
       toast({ title: "Invalid Email", description: "Please enter a valid email address.", variant: "destructive" });
+      setIsSubmitting(false);
+      return;
+    }
+    if (!/^\d{10,}$/.test(formData.phone.replace(/\s+/g, ''))) {
+      toast({ title: "Invalid Phone Number", description: "Please enter a valid 10-digit phone number.", variant: "destructive" });
       setIsSubmitting(false);
       return;
     }
@@ -142,8 +147,8 @@ const CelebrateBirthdayPage = () => {
                 <Input id="celebrate-email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="E.g., ananya@example.com" required className="mt-1 rounded-lg"/>
               </div>
               <div>
-                <Label htmlFor="celebrate-phone" className="font-medium">Phone Number (Optional)</Label>
-                <Input id="celebrate-phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="E.g., 9876543210" className="mt-1 rounded-lg"/>
+                <Label htmlFor="celebrate-phone" className="font-medium">Phone Number <span className="text-destructive">*</span></Label>
+                <Input id="celebrate-phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="E.g., 9876543210" required className="mt-1 rounded-lg"/>
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-6">
