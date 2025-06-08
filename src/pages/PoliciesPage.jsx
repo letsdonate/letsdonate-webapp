@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
@@ -43,9 +44,9 @@ const PoliciesPage = () => {
               <p className="text-muted-foreground mb-2">
                 We love capturing moments from our events to share the impact of our work. However, we prioritize the dignity and safety of all individuals involved.
               </p>
-              <p className="font-semibold text-foreground">
+              {/* <p className="font-semibold text-foreground">
                 "All photos and videos of Let's Donate events must be approved before being shared publicly."
-              </p>
+              </p> */}
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground mt-2">
                 <li>Consent will be obtained from participants (or their guardians for minors) before taking photos or videos where individuals are identifiable.</li>
                 <li>Images and videos are used for promoting Let's Donate's mission, fundraising, and reporting to stakeholders.</li>
@@ -83,3 +84,4 @@ const PoliciesPage = () => {
 };
 
 export default PoliciesPage;
+  

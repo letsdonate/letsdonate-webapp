@@ -59,13 +59,13 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let’s Donate</h2>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              Let’s Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
-            </p>
-            <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 hover:text-primary rounded-lg">
-              <Link to="/about-us">Discover Our Story</Link>
-            </Button>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let’s Donate</h2>
+          <p className="text-lg md:text-xl text-muted-foreground mb-8">
+            Let’s Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
+          </p>
+          <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 hover:text-primary rounded-lg">
+            <Link to="/about-us">Discover Our Story</Link>
+          </Button>
           </motion.div>
         </div>
       </SectionWrapper>

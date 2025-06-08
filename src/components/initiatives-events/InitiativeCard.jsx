@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Clock } from 'lucide-react';
 
-const DEFAULT_INITIATIVE_IMAGE = "https://dl.dropboxusercontent.com/scl/fi/1bdoxdf3btzwiiu7hr8pi/LETS_SUMMER_MAIN.jpg?rlkey=61ukkag7liy9qiot36qz7fp18&raw=1";
+const DEFAULT_INITIATIVE_IMAGE = "https://dl.dropboxusercontent.com/scl/fi/k31oatkta5p9vvy2n9ijd/lets_summer_1.jpg?rlkey=89pz3ge065w75n61d8lb9njz0&raw=1";
 
 const InitiativeCard = ({ initiative, index }) => {
   const cardVariants = {

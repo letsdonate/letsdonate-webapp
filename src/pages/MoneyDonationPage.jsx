@@ -73,7 +73,7 @@ const MoneyDonationPage = () => {
     title: "Where Your Money Goes", 
     description: "Your financial contribution empowers us to continue our vital work and expand our reach. Every rupee makes a significant difference in the lives we touch.", 
     impact_info: defaultImpactInfo, 
-    qr_code_url: "https://storage.googleapis.com/hostinger-horizons-assets-prod/024023c4-ed43-42c4-98a8-13e531a971a7/4981ba572bd02005b48385ceb0e64a88.png",
+    qr_code_url: "https://dl.dropboxusercontent.com/scl/fi/0ndufpvpg6xfqehkwhh6b/UPI_QR.png?rlkey=t2ef914rp1d0t40kpnsqpve11&st=0dgg2pn4&raw=1",
     contact_info: "UPI ID: shubham150796-2@okaxis" 
   };
 

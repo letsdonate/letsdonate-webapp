@@ -19,21 +19,21 @@ const teamMembers = [
     name: "Shubham Choudhary", 
     role: "Founder & Chief Everything Officer", 
     imagePlaceholder: "SC", 
-    imageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80", // Placeholder, replace with actual
+    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/vwjyanc56mt388rgi26gf/Shubham.jpg?rlkey=jk9g3voxi5mo22u5cvu6zj5kz", // Placeholder, replace with actual
     bio: "A software engineer with a heart for service, Shubham started Let’s Donate to make kindness more accessible and community action more powerful through empathy and technology." 
   },
-  { 
+  {
     name: "Aakansha Shukla", 
     role: "Chief Get-It-Done Officer", 
     imagePlaceholder: "AS", 
-    imageUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80", // Placeholder, replace with actual
+    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/oodsoqhcr1esdqfpgftua/Aakansha.jpg?rlkey=2mpy8wpzvhsfpxfgqthd4bw1e&st=vxezgy3t&raw=1", // Placeholder, replace with actual
     bio: "Aakansha plays a key role in planning and executing on-ground initiatives. From coordinating sessions to supporting volunteers, she ensures every effort runs with care and consistency." 
   },
-  { 
+  {
     name: "Shubham Verma", 
     role: "Chief Behind-the-Scenes Officer", 
     imagePlaceholder: "SV", 
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80", // Placeholder, replace with actual
+    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/negqvnvf445w75zxw589p/shubham_verma.jpg?rlkey=sh9djv8du1pcnqe211h22nxag&st=zb9bfqm3&raw=1", // Placeholder, replace with actual
     bio: "Shubham works behind the scenes to keep everything running smoothly—overseeing logistics, refining operations, and offering support wherever it's needed most." 
   },
 ];
@@ -128,7 +128,7 @@ const AboutUsPage = () => {
             transition={{ duration: 0.8 }}
             className="space-y-6"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-primary">Who We Are: A Story of Joyful Giving</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary">Who We Are</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Let's Donate is a community-driven movement making learning joyful and accessible for underprivileged and special children. Founded in 2023 by a software engineer who discovered the joy of giving while teaching at an orphanage, we began with a few weekend sessions—and have since grown into a network of volunteers creating hands-on, fun learning experiences across schools, orphanages, and shelters.
             </p>
@@ -147,7 +147,7 @@ const AboutUsPage = () => {
             <img  
               alt="Group of diverse volunteers smiling and working together"
               className="rounded-xl shadow-2xl w-full h-auto object-cover aspect-video"
-             src="https://images.unsplash.com/photo-1560220604-509907ca9266?auto=format&fit=crop&w=1200&q=80" />
+             src="https://dl.dropboxusercontent.com/scl/fi/6ed8jlr4rcqghio1d3dea/who_we_are.jpg?rlkey=anwjpxutayxsjtosbiff5kbgf&st=d4dsv7ir&raw=1" />
           </motion.div>
         </div>
       </SectionWrapper>

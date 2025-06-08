@@ -21,7 +21,7 @@ const defaultHeroSlidesData = [
     subtitle: "Celebrate your birthday by supporting a cause close to your heart. Spread joy with Let's Donate.",
     buttonText: "Celebrate With Us",
     buttonLink: "/celebrate-birthday",
-    imageSrc: "https://images.unsplash.com/photo-1560439514-e960a3ef50d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80" 
+    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/rk6qr6lcnzycoguzp1fxc/birthday_carousel.jpg?rlkey=abhkzi3yyrye9elfuchl7drjb&st=dfzxn3ia&dl=0" 
   },
   {
     titlePart1: "Every",
@@ -30,7 +30,7 @@ const defaultHeroSlidesData = [
     subtitle: "Your financial support empowers our projects and helps us reach more communities in need.",
     buttonText: "Donate Funds",
     buttonLink: "/donate/money",
-    imageSrc: "https://images.unsplash.com/photo-1604594899087-9852147a1136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80" 
+    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/vrhwd4vsx1ieykwokmrcu/Carousel_1.jpg?rlkey=6u6rv3u7jf9snsdou8j0ehc6a&raw=1" 
   },
   {
     titlePart1: "Share your",
@@ -39,7 +39,7 @@ const defaultHeroSlidesData = [
     subtitle: "Donate materials like books, clothes, or toys and directly impact someone's life.",
     buttonText: "Gift Items",
     buttonLink: "/donate/material",
-    imageSrc: "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80" 
+    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/oeocmp5nzc16ehwhgqnj9/resources_carousel.jpg?rlkey=alua47mf4m5dzrgqiioft1rbm&raw=1" 
   },
 ];
 

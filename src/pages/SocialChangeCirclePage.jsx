@@ -76,8 +76,8 @@ const SocialChangeCirclePage = () => {
           >
             <img  
               className="rounded-xl shadow-2xl w-full h-auto object-cover aspect-[4/3]" 
-              alt="Diverse group of people connected via mobile phones and social media icons"
-             src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=80" />
+              alt="Make a change together"
+             src="https://dl.dropboxusercontent.com/scl/fi/conitrh3s5zpgw4j55dhu/social_circle.jpg?rlkey=yeftnx7exslkfb3y6g2pkbv0x&st=0vcvnxao&raw=1" />
           </motion.div>
         </div>
       </SectionWrapper>
