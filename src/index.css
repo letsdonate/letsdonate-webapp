@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   :root {
     --background: 180 25% 97%; /* #F0F4F4 - Soft Teal Off-white */
@@ -37,7 +41,7 @@
 
     --radius: 0.75rem; /* Rounded edges */
   }
-
+ 
   .dark {
     /* Dark mode can be defined later if needed */
   }
@@ -78,7 +82,18 @@
   background: linear-gradient(rgba(0,128,128,0.6), rgba(0,128,128,0.75));
 }
 
-/* Smooth scroll for parallax (if implemented with JS) */
-html {
-  scroll-behavior: smooth;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+  opacity: 0;
 }

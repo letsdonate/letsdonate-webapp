@@ -12,7 +12,7 @@ const defaultHeroSlidesData = [
     subtitle: "Join Let's Donate and make a tangible difference in the lives of those who need it most.",
     buttonText: "Join as a Volunteer",
     buttonLink: "/donate/time",
-    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/vrhwd4vsx1ieykwokmrcu/Carousel_1.jpg?rlkey=6u6rv3u7jf9snsdou8j0ehc6a&raw=1" 
+    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/nu0xt3pnx8con0yqs8w1m/join_us_carousel.jpg?rlkey=ny4eomy73r7candsacpotgjvw&st=ukh81ynh&raw=1"
   },
   {
     titlePart1: "Make your special day",
@@ -39,7 +39,7 @@ const defaultHeroSlidesData = [
     subtitle: "Donate materials like books, clothes, or toys and directly impact someone's life.",
     buttonText: "Gift Items",
     buttonLink: "/donate/material",
-    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/oeocmp5nzc16ehwhgqnj9/resources_carousel.jpg?rlkey=alua47mf4m5dzrgqiioft1rbm&raw=1" 
+    imageSrc: "https://dl.dropboxusercontent.com/scl/fi/ryb8k2f2m0j2mxrloqnpg/share_carousel.jpeg?rlkey=bbgl3bvs1987t65s5swairgqy&st=yntjr2cx&raw=1" 
   },
 ];
 

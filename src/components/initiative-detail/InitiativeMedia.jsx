@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ChevronLeft, ChevronRight, Maximize, Video, PlayCircle } from 'lucide-react';
 
 const InitiativeMedia = ({ 
   photos, 
@@ -86,13 +86,13 @@ const InitiativeMedia = ({
       )}
 
       {/* Video Section */}
-      {videos && videos.length > 0 && (
+      {videos && (videos.length > 0 ? (
           <Card className="shadow-xl rounded-xl overflow-hidden bg-muted/30">
               <CardHeader>
                   <CardTitle className="text-2xl text-primary">{videos[currentVideoIndex]?.title || "Watch Our Work"}</CardTitle>
               </CardHeader>
               <CardContent>
-                  <div className="relative group aspect-video w-full max-w-3xl mx-auto"> {/* Increased max-width for larger video */}
+                  <div className="relative group aspect-video w-full max-w-3xl mx-auto">
                        <AnimatePresence initial={false} custom={currentVideoIndex}>
                           <motion.iframe
                               key={`${currentVideoIndex}-${videos[currentVideoIndex]?.url}`}
@@ -133,7 +133,21 @@ const InitiativeMedia = ({
                   )}
               </CardContent>
           </Card>
-      )}
+      ) : (
+          <Card className="shadow-xl rounded-xl overflow-hidden bg-muted/30">
+              <CardHeader>
+                  <CardTitle className="text-2xl text-primary">Event Video</CardTitle>
+                  <CardDescription>No video available for this event yet</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <div className="relative aspect-video w-full max-w-3xl mx-auto bg-muted/50 rounded-lg flex flex-col items-center justify-center text-muted-foreground">
+                      <Video className="h-16 w-16 mb-4 opacity-50" />
+                      <p className="text-lg font-medium">Video Coming Soon</p>
+                      <p className="text-sm mt-2">Check back later for event highlights</p>
+                  </div>
+              </CardContent>
+          </Card>
+      ))}
     </div>
   );
 };

@@ -16,10 +16,10 @@ const mainNavLinksBeforeDonate = [
 ];
 
 const mainNavLinksAfterDonate = [
-  { to: '/about-us', label: 'About Us', icon: <Info className="h-5 w-5 mr-2 md:hidden" /> },
   { to: '/initiatives-events', label: 'Initiatives & Events', icon: <Sparkles className="h-5 w-5 mr-2 md:hidden" /> },
   { to: '/ngo-network', label: 'NGO Network', icon: <Handshake className="h-5 w-5 mr-2 md:hidden" /> },
   { to: '/social-change-circle', label: 'Social Circle', icon: <Users className="h-5 w-5 mr-2 md:hidden" /> },
+  { to: '/about-us', label: 'About Us', icon: <Info className="h-5 w-5 mr-2 md:hidden" /> },
 ];
 
 const donateSubLinks = [
@@ -27,6 +27,7 @@ const donateSubLinks = [
   { to: '/donate/material', label: 'Donate Material', icon: <Gift className="h-5 w-5 mr-2" /> },
   { to: '/donate/money', label: 'Donate Money', icon: <span className="font-bold text-lg mr-2.5 ml-0.5">₹</span> },
   { to: '/celebrate-birthday', label: 'Celebrate With Us', icon: <Cake className="h-5 w-5 mr-2" /> },
+  { to: '/ngo-network#collaborate', label: 'Collaborate with Us', icon: <Handshake className="h-5 w-5 mr-2" /> },
 ];
 
 const Navbar = () => {

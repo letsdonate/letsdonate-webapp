@@ -26,9 +26,9 @@ const achievements = [
 
 
 const galleryImages = [
-  { srcPlaceholder: "Joyful children learning in a classroom setting", alt: "Children learning with volunteers", actualSrc: "https://images.unsplash.com/photo-1595872018818-97555653a011?auto=format&fit=crop&w=600&q=80" },
-  { srcPlaceholder: "Volunteers distributing supplies to a community", alt: "Volunteers distributing supplies", actualSrc: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&w=600&q=80" },
-  { srcPlaceholder: "A group of happy volunteers posing together", alt: "Happy volunteers group photo", actualSrc: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80" },
+  { srcPlaceholder: "Joyful children learning in a classroom setting", alt: "Children learning with volunteers", actualSrc: "https://dl.dropboxusercontent.com/scl/fi/rhjqkah8yb572h5oylvwo/front_gallery.jpeg?rlkey=g50e4g1hvt4z1pc1w9dfpdbxu&st=g35i4sdp&raw=1" },
+  { srcPlaceholder: "Volunteers distributing supplies to a community", alt: "Volunteers distributing supplies", actualSrc: "https://dl.dropboxusercontent.com/scl/fi/w2lzaygqdnmea0fjl19vf/event_front-1.jpg?rlkey=phxoggiri3acud8r7c725aizw&st=apqon7wz&raw=1" },
+  { srcPlaceholder: "A group of happy volunteers posing together", alt: "Happy volunteers group photo", actualSrc: "https://dl.dropboxusercontent.com/scl/fi/o9g3vlxj4yjx3c4mx0mr7/front_gallery1.jpeg?rlkey=tm76dni7bmuyqxqg5waci0x4w&st=492rfs0j&raw=1" },
 ];
 
 const LandingPage = () => {

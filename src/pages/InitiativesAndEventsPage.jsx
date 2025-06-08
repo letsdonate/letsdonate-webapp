@@ -12,67 +12,12 @@ import TabNavigation from '@/components/initiatives-events/TabNavigation';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
 import { staticInitiativesData } from '@/data/initiativesData';
+import { staticEventsData } from '@/data/eventsData';
 import { Users, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 6;
 const DEFAULT_EVENT_IMAGE = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80";
 const DEFAULT_EVENT_VIDEO = "https://www.youtube.com/embed/mro5NEfTWNw";
-
-export const placeholderEventsData = [ 
-  {
-    id: 'sample-ongoing-event', 
-    title: "Ongoing: Raipur Tech Fair 2025",
-    description: "Explore the latest in technology, attend workshops, and network with professionals. This week-long fair has something for everyone interested in tech innovation.",
-    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), 
-    location: "Raipur International Tech Park, Raipur",
-    category: "Technology",
-    photos: ["https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"],
-    youtube_link: DEFAULT_EVENT_VIDEO,
-    type: 'event',
-    status: 'Ongoing', 
-    registration_link: '/events/sample-ongoing-event' 
-  },
-  {
-    id: 'placeholder-event-future-leaders',
-    title: "Future Leaders Summit",
-    description: "A 3-day summit for aspiring young leaders featuring talks, panel discussions, and leadership workshops with renowned figures.",
-    date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), 
-    location: "Grand Convention Center, Raipur",
-    category: "Leadership",
-    photos: ["https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80"],
-    youtube_link: DEFAULT_EVENT_VIDEO,
-    type: 'event',
-    status: 'Future',
-    registration_link: '/events/placeholder-event-future-leaders'
-  },
-  {
-    id: 'placeholder-event-past-meetup',
-    title: "Let’s Connect – Educator & Volunteer Meetup",
-    description: "A planning and bonding session where educators and volunteers aligned on upcoming summer activities and shared creative ideas to engage children.",
-    date: new Date("2025-07-27T15:00:00").toISOString(),
-    location: "Food Library, Civil Lines",
-    category: "Team Meetup",
-    photos: ["https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80"],
-    youtube_link: DEFAULT_EVENT_VIDEO,
-    type: 'event',
-    status: 'Past',
-    registration_link: '/events/placeholder-event-past-meetup'
-  },
-  {
-    id: 'placeholder-event-past-annual',
-    title: "Let’s Donate Annual Celebration",
-    description: "Marking two years since our first session, this gathering celebrated milestones, memories, and the movement that’s growing stronger with every act of kindness.",
-    date: new Date("2024-06-09T16:00:00").toISOString(),
-    location: "Click For Clarity Community Space, Raipur",
-    category: "Foundation Day Event",
-    photos: ["https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80"],
-    youtube_link: DEFAULT_EVENT_VIDEO,
-    type: 'event',
-    status: 'Done',
-    registration_link: '/events/placeholder-event-past-annual'
-  }
-];
-
 
 const InitiativesAndEventsPage = () => {
   const { toast } = useToast();
@@ -87,32 +32,46 @@ const InitiativesAndEventsPage = () => {
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // First, get static events
+      const staticEvents = staticEventsData.map(event => ({
+        ...event,
+        type: 'event',
+        photos: event.photos || [DEFAULT_EVENT_IMAGE],
+        youtube_link: event.youtube_link || DEFAULT_EVENT_VIDEO,
+        status: event.status || 'Upcoming'
+      }));
+
+      // Then, get dynamic events from Supabase
+      const { data: dynamicEvents, error } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: false });
+        .order('date', { ascending: true });
 
-      if (error) throw error;
-      
-      let combinedEvents = [...placeholderEventsData]; 
-
-      if (data && data.length > 0) {
-        const dbEvents = data.map(event => ({
+      if (error) {
+        console.error('Error fetching events:', error);
+        toast({
+          title: "Error fetching events",
+          description: "There was a problem loading the events. Please try again later.",
+          variant: "destructive"
+        });
+        setEvents(staticEvents); // At least show static events
+      } else {
+        const processedDynamicEvents = dynamicEvents.map(event => ({
           ...event,
           type: 'event',
-          photos: event.images && event.images.length > 0 ? event.images : [DEFAULT_EVENT_IMAGE],
+          photos: event.photos && event.photos.length > 0 ? event.photos : [DEFAULT_EVENT_IMAGE],
           youtube_link: event.youtube_link || DEFAULT_EVENT_VIDEO,
-          status: event.status || 'Future', 
-          registration_link: event.registration_link || `/events/${event.id}`
+          status: event.status || 'Upcoming'
         }));
-        combinedEvents = dbEvents.concat(
-          placeholderEventsData.filter(pEvent => !dbEvents.some(dbEvent => dbEvent.id === pEvent.id))
-        );
+        setEvents([...staticEvents, ...processedDynamicEvents]);
       }
-      setEvents(combinedEvents);
     } catch (error) {
-      toast({ title: "Error fetching events", description: error.message, variant: "destructive" });
-      setEvents(placeholderEventsData); 
+      console.error('Error in fetchEvents:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem loading the events. Please try again later.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -121,6 +80,27 @@ const InitiativesAndEventsPage = () => {
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (value) => {
+    setCategoryFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    setCurrentPage(1);
+    setCategoryFilter('all');
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const itemsToDisplay = useMemo(() => {
     let sourceItems = [];
@@ -164,26 +144,6 @@ const InitiativesAndEventsPage = () => {
     const uniqueCategories = new Set(categoriesSource.filter(Boolean));
     return ['all', ...Array.from(uniqueCategories)];
   }, [activeTab, events, initiatives]);
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-      const filtersSection = document.getElementById('filters-section');
-      if (filtersSection) {
-        window.scrollTo({
-          top: filtersSection.offsetTop - 80, 
-          behavior: 'smooth'
-        });
-      }
-    }
-  };
-  
-  const handleTabChange = (value) => {
-    setActiveTab(value);
-    setCurrentPage(1);
-    setCategoryFilter('all');
-    setSearchTerm('');
-  };
 
   const showNoResultsMessage = !loading && paginatedItems.length === 0;
 

@@ -6,52 +6,42 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea'; 
-import { Gift, BookOpen, Shirt, ToyBrick, MapPin, CheckCircle } from 'lucide-react';
+import { Gift, BookOpen, Shirt, ToyBrick, MapPin, CheckCircle, Apple, UserCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabaseClient';
 
 const neededMaterialsEvents = [
-  { 
-    id: 1, 
-    title: 'Back-to-School Drive', 
-    location: 'North Bangalore Community Center', 
-    imagePlaceholder: 'Colorful school supplies like notebooks and pencils',
+  {
+    id: 1,
+    title: "Let's Prepare – Exam Readiness Drive",
+    location: 'Government Schools Across Raipur',
+    imagePlaceholder: 'https://dl.dropboxusercontent.com/scl/fi/m89bvxo8vhacobg4wjr1g/6dcbb986-4f5b-4635-b21a-47d12e53fc83.JPG?rlkey=xctzaie44z1scw02fywud8uxl&raw=1',
     requirements: [
-      { item: 'Notebooks (Unruled & Ruled)', icon: <BookOpen className="h-5 w-5 text-primary" /> },
-      { item: 'Pencils & Pens', icon: <BookOpen className="h-5 w-5 text-primary" /> },
-      { item: 'School Bags', icon: <Shirt className="h-5 w-5 text-primary" /> },
-      { item: 'Geometry Boxes', icon: <BookOpen className="h-5 w-5 text-primary" /> },
+      { item: 'Books for 8th Class Scholarship Exam', icon: <BookOpen className="h-5 w-5 text-primary" /> },
+      { item: 'Notebooks & Xerox Material', icon: <BookOpen className="h-5 w-5 text-primary" /> },
+      { item: 'Gifts for Exam Toppers', icon: <Gift className="h-5 w-5 text-primary" /> },
     ]
   },
-  { 
-    id: 2, 
-    title: 'Winter Warmth Collection', 
-    location: 'City Shelter Outreach Program', 
-    imagePlaceholder: 'Warm clothes like sweaters and blankets',
+  {
+    id: 2,
+    title: "Let's Read – Reading & Support Drive",
+    location: 'Orphanages and Government Schools in Raipur',
+    imagePlaceholder: 'https://dl.dropboxusercontent.com/scl/fi/kmojn9i9atz39hptvpev2/IMG_3447-min.jpg?rlkey=5alnupqbgh1v92ubv43xpp8xd&st=mdylnzpb&raw=1',
     requirements: [
-      { item: 'Blankets (New or Gently Used)', icon: <Shirt className="h-5 w-5 text-primary" /> },
-      { item: 'Sweaters & Jackets (All sizes)', icon: <Shirt className="h-5 w-5 text-primary" /> },
-      { item: 'Socks & Caps', icon: <Shirt className="h-5 w-5 text-primary" /> },
+      { item: 'Story Books (Hindi & English)', icon: <BookOpen className="h-5 w-5 text-primary" /> },
+      { item: 'Stationery (Pens, Pencils, Crayons)', icon: <BookOpen className="h-5 w-5 text-primary" /> },
+      { item: 'Snacks & Meals for Children', icon: <Apple className="h-5 w-5 text-primary" /> },
+      { item: 'Support for Regular Classes', icon: <UserCheck className="h-5 w-5 text-primary" /> },
     ]
-  },
-  { 
-    id: 3, 
-    title: 'Play & Learn Toy Drive', 
-    location: 'Childrens\' Activity Center, Jayanagar', 
-    imagePlaceholder: 'Educational toys and board games for children',
-    requirements: [
-      { item: 'Educational Toys (Ages 3-10)', icon: <ToyBrick className="h-5 w-5 text-primary" /> },
-      { item: 'Story Books (English & Kannada)', icon: <BookOpen className="h-5 w-5 text-primary" /> },
-      { item: 'Board Games', icon: <ToyBrick className="h-5 w-5 text-primary" /> },
-    ]
-  },
+  }
 ];
 
 const dropOffLocations = [
-  { name: 'Let\'s Donate HQ', address: '123 Kindness Lane, Koramangala, Bangalore', hours: 'Mon-Fri, 10 AM - 5 PM' },
-  { name: 'South Bangalore Collection Point', address: '456 Charity Road, J.P. Nagar, Bangalore', hours: 'Sat, 11 AM - 3 PM' },
+  { name: "Ekta Nagar Drop-off", address: "Ekta Nagar, Raipur, Chhattisgarh", hours: "Sun, 11 AM - 2 PM" },
+  { name: "Sadar Bazar Drop-off", address: "Sadar Bazar, Raipur, Chhattisgarh", hours: "Sun, 11 AM - 2 PM" },
 ];
+
 
 const MaterialDonationPage = () => {
   const { toast } = useToast();
@@ -136,18 +126,19 @@ const MaterialDonationPage = () => {
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Current Material Needs</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {neededMaterialsEvents.map((event, index) => (
-            <motion.custom 
+            <div 
               key={event.id} 
-              custom={index} 
-              initial="hidden" 
-              whileInView="visible" 
-              viewport={{ once: true, amount: 0.2 }} 
-              variants={cardVariants}
-              className="h-full"
+              className="h-full animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <Card className="h-full flex flex-col rounded-xl shadow-soft hover:shadow-soft-hover transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
                 <div className="aspect-video overflow-hidden">
-                  <img  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={event.title} src="https://images.unsplash.com/photo-1595872018818-97555653a011" />
+                  <img  
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                    alt={event.title} 
+                    src={event.imagePlaceholder} 
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1595872018818-97555653a011"; }}
+                  />
                 </div>
                 <CardHeader className="pt-6">
                   <CardTitle className="text-xl lg:text-2xl text-primary">{event.title}</CardTitle>
@@ -172,7 +163,7 @@ const MaterialDonationPage = () => {
                   </Button>
                 </CardFooter>
               </Card>
-            </motion.custom>
+            </div>
           ))}
         </div>
       </SectionWrapper>
@@ -228,13 +219,10 @@ const MaterialDonationPage = () => {
         <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12 md:mb-16">Drop-off Locations</h2>
         <div className="grid md:grid-cols-2 gap-8">
           {dropOffLocations.map((loc, index) => (
-            <motion.custom 
+            <div 
               key={loc.name} 
-              custom={index} 
-              initial="hidden" 
-              whileInView="visible" 
-              viewport={{ once: true, amount: 0.2 }} 
-              variants={cardVariants}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <Card className="p-6 rounded-xl shadow-soft bg-background">
                 <CardTitle className="text-xl text-primary mb-2 flex items-center">
@@ -243,7 +231,7 @@ const MaterialDonationPage = () => {
                 <p className="text-muted-foreground text-sm">{loc.address}</p>
                 <p className="text-muted-foreground text-sm mt-1"><strong>Hours:</strong> {loc.hours}</p>
               </Card>
-            </motion.custom>
+            </div>
           ))}
         </div>
         <p className="text-center text-muted-foreground mt-8 text-sm">

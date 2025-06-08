@@ -90,7 +90,7 @@ export const staticInitiativesData = [
     tagline: 'Because a little guidance can change a child’s entire future.',
     icon: <BookOpen className="h-8 w-8 text-primary" />,
     category: 'Education Support',
-    status: 'Ongoing', // Example: Done
+    status: 'To Start', // Example: Done
     shortDescription: "Every Saturday, volunteers step into classrooms across Raipur to prepare students for scholarship exams — and for life.",
     fullDescription: [
       "Let’s Prepare is more than academic support — it’s a belief in children who’ve rarely been told they can. Every Saturday, our volunteers visit government schools across Raipur, helping students prepare for NMMS scholarship exams. But beyond textbooks and tests, we build something deeper: confidence, curiosity, and hope.",

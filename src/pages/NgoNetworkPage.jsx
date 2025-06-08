@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
@@ -6,13 +5,14 @@ import SectionWrapper from '@/components/shared/SectionWrapper';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { HeartHandshake as Handshake, Users, ExternalLink, Loader2, AlertTriangle, Search, Filter } from 'lucide-react';
+import { HeartHandshake as Handshake, Users, ExternalLink, Loader2, AlertTriangle, Search, Filter, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { staticNgoData } from '@/data/staticNgoData';
+import { Textarea } from '@/components/ui/textarea';
 
 const DEFAULT_NGO_LOGO = "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?auto=format&fit=crop&w=300&q=60";
 
@@ -21,6 +21,16 @@ const NgoNetworkPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    organization: '',
+    role: '',
+    website: '',
+    message: ''
+  });
   const { toast } = useToast();
 
   const fetchNgos = useCallback(async () => {
@@ -68,6 +78,76 @@ const NgoNetworkPage = () => {
       scale: 1,
       transition: { delay: i * 0.07, duration: 0.5, ease: "easeOut" },
     }),
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if (!formData.name || !formData.email || !formData.phone || !formData.organization) {
+      toast({ 
+        title: "Incomplete Form", 
+        description: "Please fill in all required fields.", 
+        variant: "destructive" 
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+$/.test(formData.email)) {
+      toast({ 
+        title: "Invalid Email", 
+        description: "Please enter a valid email address.", 
+        variant: "destructive" 
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('ngo_collaborations')
+      .insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          organization: formData.organization,
+          role: formData.role,
+          website: formData.website,
+          message: formData.message
+        }
+      ]);
+
+    setIsSubmitting(false);
+
+    if (error) {
+      toast({ 
+        title: "Submission Error", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } else {
+      toast({
+        title: "Registration Successful! 🤝",
+        description: "Thank you for your interest in collaborating with us. We'll review your details and get back to you soon.",
+        className: "bg-primary text-primary-foreground",
+        duration: 7000,
+      });
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        organization: '',
+        role: '',
+        website: '',
+        message: ''
+      });
+    }
   };
 
   return (
@@ -196,6 +276,125 @@ const NgoNetworkPage = () => {
           </div>
         </SectionWrapper>
       )}
+
+      <div id="collaborate" className="scroll-mt-24">
+        <SectionWrapper className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">Collaborate with Us</h2>
+            <p className="text-lg text-muted-foreground">
+              Are you an NGO or social worker interested in joining forces with Let's Donate? Register below to explore collaboration opportunities and be part of our growing network of changemakers.
+            </p>
+          </div>
+
+          <Card className="max-w-2xl mx-auto p-6 sm:p-8 rounded-xl shadow-soft bg-background">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <Label htmlFor="name" className="font-medium">Your Name <span className="text-destructive">*</span></Label>
+                <Input 
+                  id="name" 
+                  name="name" 
+                  value={formData.name} 
+                  onChange={handleInputChange} 
+                  placeholder="Enter your full name" 
+                  required 
+                  className="mt-1 rounded-lg"
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="email" className="font-medium">Email Address <span className="text-destructive">*</span></Label>
+                  <Input 
+                    id="email" 
+                    name="email" 
+                    type="email" 
+                    value={formData.email} 
+                    onChange={handleInputChange} 
+                    placeholder="Enter your email address" 
+                    required 
+                    className="mt-1 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone" className="font-medium">Phone Number <span className="text-destructive">*</span></Label>
+                  <Input 
+                    id="phone" 
+                    name="phone" 
+                    type="tel" 
+                    value={formData.phone} 
+                    onChange={handleInputChange} 
+                    placeholder="Enter your 10-digit phone number" 
+                    required 
+                    className="mt-1 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="organization" className="font-medium">Organization Name <span className="text-destructive">*</span></Label>
+                <Input 
+                  id="organization" 
+                  name="organization" 
+                  value={formData.organization} 
+                  onChange={handleInputChange} 
+                  placeholder="Enter your organization's name" 
+                  required 
+                  className="mt-1 rounded-lg"
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="role" className="font-medium">Your Role</Label>
+                  <Input 
+                    id="role" 
+                    name="role" 
+                    value={formData.role} 
+                    onChange={handleInputChange} 
+                    placeholder="Enter your role in the organization" 
+                    className="mt-1 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="website" className="font-medium">Website (Optional)</Label>
+                  <Input 
+                    id="website" 
+                    name="website" 
+                    type="url" 
+                    value={formData.website} 
+                    onChange={handleInputChange} 
+                    placeholder="Enter your organization's website" 
+                    className="mt-1 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="message" className="font-medium">Tell us about your NGO's work and activities</Label>
+                <Textarea 
+                  id="message" 
+                  name="message" 
+                  value={formData.message} 
+                  onChange={handleInputChange} 
+                  placeholder="Describe your organization's mission, activities, and impact in the community..." 
+                  className="mt-1 rounded-lg" 
+                  rows={4}
+                />
+              </div>
+
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full rounded-lg bg-primary hover:bg-primary-soft text-primary-foreground py-3 text-base" 
+                disabled={isSubmitting}
+              >
+                <CheckCircle className="h-5 w-5 mr-2" />
+                {isSubmitting ? 'Submitting...' : 'Submit Collaboration Request'}
+              </Button>
+            </form>
+          </Card>
+        </SectionWrapper>
+      </div>
     </div>
   );
 };

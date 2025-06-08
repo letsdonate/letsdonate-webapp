@@ -19,25 +19,24 @@ const teamMembers = [
     name: "Shubham Choudhary", 
     role: "Founder & Chief Everything Officer", 
     imagePlaceholder: "SC", 
-    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/vwjyanc56mt388rgi26gf/Shubham.jpg?rlkey=jk9g3voxi5mo22u5cvu6zj5kz", // Placeholder, replace with actual
+    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/vwjyanc56mt388rgi26gf/Shubham.jpg?rlkey=jk9g3voxi5mo22u5cvu6zj5kz",
     bio: "A software engineer with a heart for service, Shubham started Let’s Donate to make kindness more accessible and community action more powerful through empathy and technology." 
   },
   {
     name: "Aakansha Shukla", 
     role: "Chief Get-It-Done Officer", 
     imagePlaceholder: "AS", 
-    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/oodsoqhcr1esdqfpgftua/Aakansha.jpg?rlkey=2mpy8wpzvhsfpxfgqthd4bw1e&st=vxezgy3t&raw=1", // Placeholder, replace with actual
+    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/oodsoqhcr1esdqfpgftua/Aakansha.jpg?rlkey=2mpy8wpzvhsfpxfgqthd4bw1e&st=vxezgy3t&raw=1", 
     bio: "Aakansha plays a key role in planning and executing on-ground initiatives. From coordinating sessions to supporting volunteers, she ensures every effort runs with care and consistency." 
   },
   {
     name: "Shubham Verma", 
     role: "Chief Behind-the-Scenes Officer", 
     imagePlaceholder: "SV", 
-    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/negqvnvf445w75zxw589p/shubham_verma.jpg?rlkey=sh9djv8du1pcnqe211h22nxag&st=zb9bfqm3&raw=1", // Placeholder, replace with actual
+    imageUrl: "https://dl.dropboxusercontent.com/scl/fi/aiig7dv1r6rn4zaj2ovqd/shubham_verma.jpg?rlkey=iqfn1gjsbhsm52h2yjs7dxe8u&st=gdpc7csl&raw=1", 
     bio: "Shubham works behind the scenes to keep everything running smoothly—overseeing logistics, refining operations, and offering support wherever it's needed most." 
   },
 ];
-
 const milestones = [
   { date: 'June 2023', event: 'Founded with a weekend summer camp; the focus was on giving back through sharing our skills.', icon: <Heart className="text-primary" /> },
   { date: 'November 2023', event: "Launched Let's Donate Clarity—our first community partnership for weekly holistic brain development sessions.", icon: <Brain className="text-primary" /> },

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { getEventById } from '@/data/eventsData';
 import PageHeader from '@/components/shared/PageHeader';
 import SectionWrapper from '@/components/shared/SectionWrapper';
 import { Button } from '@/components/ui/button';
@@ -39,52 +40,68 @@ const EventDetailPage = () => {
 
   const fetchEventDetails = useCallback(async () => {
     setLoading(true);
-    let data, error;
-    const isPlaceholderId = eventId.startsWith('placeholder-') || eventId === 'sample-ongoing-event';
+    let foundEvent = getEventById(eventId);
 
-    if (isPlaceholderId) {
-      const placeholderModule = await import('@/pages/InitiativesAndEventsPage.jsx');
-      const placeholderData = placeholderModule.placeholderEventsData;
-      data = placeholderData.find(e => e.id === eventId);
-      if (!data) error = { message: 'Placeholder event not found.' };
-    } else {
-      ({ data, error } = await supabase
+    if (!foundEvent) {
+      // If not found in static data, try fetching from Supabase
+      const { data, error } = await supabase
         .from('events')
         .select('*')
         .eq('id', eventId)
-        .single());
+        .single();
+
+      if (error || !data) {
+        toast({
+          title: "Event Not Found",
+          description: `The event with ID "${eventId}" could not be found. Redirecting...`,
+          variant: "destructive",
+          duration: 3000,
+        });
+        setTimeout(() => navigate('/initiatives-events', { replace: true }), 3000);
+        setLoading(false);
+        return;
+      }
+      foundEvent = data;
     }
 
-    if (error || !data) {
-      toast({ title: 'Error fetching event', description: error?.message || 'Event not found.', variant: 'destructive' });
-      navigate('/initiatives-events', { replace: true });
-      setLoading(false);
-      return;
+    // Process photos and videos
+    const photos = (foundEvent.photos && foundEvent.photos.length > 0) ? foundEvent.photos : [DEFAULT_EVENT_IMAGE];
+    const videos = foundEvent.youtube_link ? [{ url: foundEvent.youtube_link.includes('/embed/') ? foundEvent.youtube_link : `https://www.youtube.com/embed/${foundEvent.youtube_link.split('v=')[1]?.split('&')[0] || foundEvent.youtube_link.split('/').pop()}`, title: "Event Video" }] : (foundEvent.videos || [{url: DEFAULT_EVENT_VIDEO, title: "Event Video"}]);
+    
+    setEvent({...foundEvent, photos, videos});
+    setCurrentImageIndex(0);
+    setCurrentVideoIndex(0);
+
+    // Fetch related events
+    if (foundEvent.category) {
+      if (foundEvent.type === 'static') {
+        // For static events, get related events from static data
+        const relatedStaticEvents = staticEventsData
+          .filter(e => e.id !== eventId && e.category === foundEvent.category)
+          .slice(0, 3);
+        setRelatedEvents(relatedStaticEvents);
+      } else {
+        // For dynamic events, fetch from Supabase
+        const { data: relatedData } = await supabase
+          .from('events')
+          .select('*')
+          .eq('category', foundEvent.category)
+          .neq('id', eventId)
+          .order('date', { ascending: true })
+          .limit(3);
+
+        if (relatedData) {
+          setRelatedEvents(relatedData.map(e => ({
+            ...e,
+            type: 'event',
+            photos: e.photos && e.photos.length > 0 ? e.photos : [DEFAULT_EVENT_IMAGE],
+            youtube_link: e.youtube_link || DEFAULT_EVENT_VIDEO,
+            status: e.status || 'Upcoming'
+          })));
+        }
+      }
     }
     
-    const photos = (data.photos && data.photos.length > 0) ? data.photos : [DEFAULT_EVENT_IMAGE];
-    const videos = data.youtube_link ? [{ url: data.youtube_link.includes('/embed/') ? data.youtube_link : `https://www.youtube.com/embed/${data.youtube_link.split('v=')[1]?.split('&')[0] || data.youtube_link.split('/').pop()}`, title: "Event Video" }] : (data.videos || [{url: DEFAULT_EVENT_VIDEO, title: "Event Video"}]);
-    setEvent({...data, photos, videos});
-
-    if (data.category && !isPlaceholderId) { 
-      const { data: relatedData, error: relatedError } = await supabase
-        .from('events')
-        .select('*')
-        .eq('category', data.category)
-        .neq('id', eventId) 
-        .order('date', { ascending: true })
-        .limit(3);
-      if (!relatedError && relatedData) {
-        setRelatedEvents(relatedData.map(e => ({
-            ...e, type: 'event', photos: e.images && e.images.length > 0 ? e.images : [DEFAULT_EVENT_IMAGE],
-            youtube_link: e.youtube_link || DEFAULT_EVENT_VIDEO, status: e.status || 'Upcoming'
-        })));
-      }
-    } else if (isPlaceholderId) {
-        const placeholderModule = await import('@/pages/InitiativesAndEventsPage.jsx');
-        const allPlaceholders = placeholderModule.placeholderEventsData;
-        setRelatedEvents(allPlaceholders.filter(p => p.id !== eventId).slice(0,2));
-    }
     setLoading(false);
   }, [eventId, navigate, toast]);
 

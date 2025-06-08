@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Users, Lightbulb, Zap, MessageSquare, ExternalLink, ArrowRight, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from '@/components/ui/use-toast';
 
 const SocialChangeCirclePage = () => {
   const cardVariants = {
@@ -104,20 +105,52 @@ const SocialChangeCirclePage = () => {
         </div>
       </SectionWrapper>
 
-      <SectionWrapper id="final-cta" className="text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Ready to Make Waves?</h2>
-        <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-          Your ideas, energy, and passion can fuel real change. Click below and become an active part of the Let's Donate Social Change Circle today!
-        </p>
-        <Button 
-          size="xl" 
-          asChild 
-          className="rounded-lg bg-secondary hover:bg-secondary/90 text-secondary-foreground px-12 py-4 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105"
-        >
-          <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-            Join the WhatsApp Community <ArrowRight className="h-5 w-5 ml-2"/>
-          </a>
-        </Button>
+      <div className="relative py-16">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-full border-t border-primary/10"></div>
+        </div>
+        <div className="relative flex justify-center">
+          <div className="bg-background px-4 flex items-center gap-4">
+            <Users className="h-8 w-8 text-primary/30" />
+            <div className="w-2 h-2 rounded-full bg-primary/30"></div>
+            <MessageSquare className="h-8 w-8 text-primary/30" />
+            <div className="w-2 h-2 rounded-full bg-primary/30"></div>
+            <Users className="h-8 w-8 text-primary/30" />
+          </div>
+        </div>
+      </div>
+
+      <SectionWrapper id="final-cta" className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl py-16 md:py-20 text-center">
+        <div className="relative">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Ready to Make Waves?</h2>
+          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Your ideas, energy, and passion can fuel real change. Join our WhatsApp community and invite your friends to be part of this transformative journey. Together, we can create a bigger impact!
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              size="xl" 
+              asChild 
+              className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white px-12 py-4 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105"
+            >
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                Join the WhatsApp Community <ArrowRight className="h-5 w-5 ml-2"/>
+              </a>
+            </Button>
+            <Button 
+              size="xl" 
+              asChild 
+              className="rounded-lg bg-[#25D366] hover:bg-[#128C7E] text-white px-12 py-4 text-lg font-semibold shadow-soft-hover transition-all duration-300 transform hover:scale-105"
+            >
+              <a 
+                href={`https://wa.me/?text=${encodeURIComponent("Join Let's Donate Social Change Circle! Together, we can make a real difference in our community. Join our WhatsApp group: " + whatsappLink)}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <MessageSquare className="h-5 w-5 mr-2" /> Share with Friends
+              </a>
+            </Button>
+          </div>
+        </div>
       </SectionWrapper>
     </div>
   );
