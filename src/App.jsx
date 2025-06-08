@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
@@ -18,8 +17,12 @@ import PoliciesPage from '@/pages/PoliciesPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import { Toaster } from '@/components/ui/toaster';
 import ScrollToTop from '@/components/shared/ScrollToTop';
+import useAutoRefresh from './hooks/useAutoRefresh';
 
-function App() {
+const App = () => {
+  // Auto refresh after 5 minutes of inactivity
+  useAutoRefresh(300000);
+
   return (
     <Router>
       <ScrollToTop />

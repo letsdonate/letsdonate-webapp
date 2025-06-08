@@ -45,7 +45,7 @@ const InitiativeMedia = ({
                 <AnimatePresence initial={false} custom={currentImageIndex}>
                   <motion.img
                     key={currentImageIndex}
-                    src={photos[currentImageIndex]}
+                    src={photos[currentImageIndex] + '?v=' + Date.now()}
                     alt={`${title} - Image ${currentImageIndex + 1}`}
                     className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg"
                     initial={{ opacity: 0, x: currentImageIndex > 0 ? 50 : (currentImageIndex < 0 ? -50 : 0) }}

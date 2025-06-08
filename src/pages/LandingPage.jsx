@@ -59,9 +59,9 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let’s Donate</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Welcome to Let's Donate</h2>
           <p className="text-lg md:text-xl text-muted-foreground mb-8">
-            Let’s Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
+            Let's Donate is a movement to bring kindness back into the world — by donating time, money, or materials to those who need it most. We believe that every small act of generosity contributes to a wave of positive change.
           </p>
           <Button variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 hover:text-primary rounded-lg">
             <Link to="/about-us">Discover Our Story</Link>
@@ -142,7 +142,7 @@ const LandingPage = () => {
               <img 
                 className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                 alt={image.alt}
-                src={image.actualSrc} 
+                src={`${image.actualSrc}${image.actualSrc.includes('?') ? '&' : '?'}v=${Date.now()}`}
                 onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80'; }}
               />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
